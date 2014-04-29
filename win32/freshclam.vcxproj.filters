@@ -61,5 +61,8 @@
     <ClCompile Include="compat\resolv.c">
       <Filter>Source Files\compat</Filter>
     </ClCompile>
+    <ClCompile Include="..\shared\clamdcom.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

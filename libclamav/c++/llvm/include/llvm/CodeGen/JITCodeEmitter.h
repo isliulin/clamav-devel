@@ -22,6 +22,7 @@
 #include "llvm/Support/MathExtras.h"
 #include "llvm/CodeGen/MachineCodeEmitter.h"
 #include "llvm/ADT/DenseMap.h"
+#include <algorithm> 
 
 using namespace std;
 

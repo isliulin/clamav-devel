@@ -42,7 +42,7 @@ EXPORTS cl_engine_set_clcb_hash @34
 EXPORTS cl_engine_set_clcb_pre_cache @35
 EXPORTS cl_engine_set_clcb_meta @36
 EXPORTS cl_always_gen_section_hash @37
-
+EXPORTS cl_scandesc_callback_hnmavocl @38
 
 ; path variables
 ; --------------

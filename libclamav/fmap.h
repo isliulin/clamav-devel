@@ -34,6 +34,10 @@
 #include "cltypes.h"
 #include "clamav.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 struct cl_fmap;
 typedef cl_fmap_t fmap_t;
 
@@ -71,14 +75,20 @@ struct cl_fmap {
 
     /* vtable for implementation */
     void        (*unmap)(fmap_t*);
+
     const void* (*need)(fmap_t*, size_t at, size_t len, int lock);
+
     const void* (*need_offstr)(fmap_t*, size_t at, size_t len_hint);
+
     const void* (*gets)(fmap_t*, char *dst, size_t *at, size_t max_len);
+
     void        (*unneed_off)(fmap_t*, size_t at, size_t len);
+	
 #ifdef _WIN32
     HANDLE fh;
     HANDLE mh;
 #endif
+	
     uint32_t placeholder_for_bitmap;
 };
 

@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -20,69 +19,73 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Valgrind.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Path.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\ThreadLocal.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Memory.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\TimeValue.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Disassembler.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Signals.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Process.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Mutex.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Threading.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\IncludeFile.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Errno.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\DynamicLibrary.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Host.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\RWMutex.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Program.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Atomic.cpp"/>
-    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Alarm.cpp"/>
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Valgrind.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Path.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\ThreadLocal.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Memory.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\TimeValue.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Disassembler.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Signals.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Process.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Mutex.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Threading.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\IncludeFile.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Errno.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\DynamicLibrary.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Host.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\RWMutex.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Program.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Atomic.cpp" />
+    <ClCompile Include="..\libclamav\c++\llvm\lib\System\Alarm.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{47B564C4-ADCA-44DC-8BC9-E87FD18B19C5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>LLVMsystem</RootNamespace>
   </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
-    <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"/>
+    <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
-    <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"/>
+    <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
-    <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"/>
+    <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
-    <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"/>
+    <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros"/>
+  <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IntDir>$(SolutionDir)build\$(PlatformName)\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)$(PlatformName)\$(Configuration)\</OutDir>
@@ -167,7 +170,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>

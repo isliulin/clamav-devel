@@ -2962,6 +2962,190 @@ int cli_magic_scandesc(int desc, cli_ctx *ctx)
     return cli_base_scandesc(desc, ctx, CL_TYPE_ANY);
 }
 
+/* File scanning supported hnmavocl*/
+static int magic_scandesc_hnmavocl(cli_ctx *ctx, cli_file_t type)
+{
+	int ret = CL_CLEAN;
+	cli_file_t dettype = 0;
+	uint8_t typercg = 1;
+	cli_file_t current_container_type = ctx->container_type;
+	size_t current_container_size = ctx->container_size, hashed_size;
+	unsigned char hash[16];
+	bitset_t *old_hook_lsig_matches;
+	const char *filetype;
+	int cache_clean = 0, res;
+
+	if (!ctx->engine) {
+		cli_errmsg("CRITICAL: engine == NULL\n");
+		early_ret_from_magicscan(CL_ENULLARG);
+	}
+
+	if (!(ctx->engine->dboptions & CL_DB_COMPILED)) {
+		cli_errmsg("CRITICAL: engine not compiled\n");
+		early_ret_from_magicscan(CL_EMALFDB);
+	}
+
+	if (ctx->engine->maxreclevel && ctx->recursion > ctx->engine->maxreclevel) {
+		cli_dbgmsg("cli_magic_scandesc: Archive recursion limit exceeded (%u, max: %u)\n", ctx->recursion, ctx->engine->maxreclevel);
+		emax_reached(ctx);
+		early_ret_from_magicscan(CL_CLEAN);
+	}
+
+	if (cli_updatelimits(ctx, (*ctx->fmap)->len) != CL_CLEAN) {
+		emax_reached(ctx);
+		early_ret_from_magicscan(CL_CLEAN);
+	}
+	old_hook_lsig_matches = ctx->hook_lsig_matches;
+	if (type == CL_TYPE_PART_ANY) {
+		typercg = 0;
+	}
+
+	perf_start(ctx, PERFT_FT);
+	if ((type == CL_TYPE_ANY) || type == CL_TYPE_PART_ANY)
+		type = cli_filetype2(*ctx->fmap, ctx->engine, type);
+	perf_stop(ctx, PERFT_FT);
+
+	if (type == CL_TYPE_ERROR) {
+		cli_dbgmsg("cli_magic_scandesc: cli_filetype2 returned CL_TYPE_ERROR\n");
+		early_ret_from_magicscan(CL_EREAD);
+	}
+	filetype = cli_ftname(type);
+	hashed_size = 0;
+	CALL_PRESCAN_CB(cb_pre_cache);
+
+	perf_start(ctx, PERFT_CACHE);
+	res = cache_check(hash, ctx);
+	if (res != CL_VIRUS) {
+		perf_stop(ctx, PERFT_CACHE);
+		early_ret_from_magicscan(res);
+	}
+
+	perf_stop(ctx, PERFT_CACHE);
+	hashed_size = (*ctx->fmap)->len;
+	ctx->hook_lsig_matches = NULL;
+
+	
+
+	CALL_PRESCAN_CB(cb_pre_scan);
+	/* ret_from_magicscan can be used below here*/
+
+#ifdef HAVE__INTERNAL__SHA_COLLECT
+	if (!ctx->sha_collect && type == CL_TYPE_MSEXE) ctx->sha_collect = 1;
+#endif
+
+	ctx->hook_lsig_matches = cli_bitset_init();
+	if (!ctx->hook_lsig_matches) {
+		ctx->hook_lsig_matches = old_hook_lsig_matches;
+		ret_from_magicscan(CL_EMEM);
+	}
+
+	if (type != CL_TYPE_IGNORED && ctx->engine->sdb) {
+		if ((ret = cli_scanraw(ctx, type, 0, &dettype, hash)) == CL_VIRUS) {
+			ret = cli_checkfp(hash, hashed_size, ctx);
+			cli_bitset_free(ctx->hook_lsig_matches);
+			ctx->hook_lsig_matches = old_hook_lsig_matches;
+			ret_from_magicscan(ret);
+		}
+	}
+
+	//ctx->recursion++;
+	//perf_nested_start(ctx, PERFT_CONTAINER, PERFT_SCAN);
+	//ctx->container_size = (*ctx->fmap)->len;
+
+	//perf_nested_stop(ctx, PERFT_CONTAINER, PERFT_SCAN);
+	//ctx->recursion--;
+	//ctx->container_type = current_container_type;
+	//ctx->container_size = current_container_size;
+
+	if (ret == CL_VIRUS) {
+		ret = cli_checkfp(hash, hashed_size, ctx);
+		cli_bitset_free(ctx->hook_lsig_matches);
+		ctx->hook_lsig_matches = old_hook_lsig_matches;
+		ret_from_magicscan(ret);
+	}
+
+	ctx->recursion++;
+	switch (type) {
+
+	case CL_TYPE_MSEXE:
+		perf_nested_start(ctx, PERFT_PE, PERFT_SCAN);
+		if (SCAN_PE && ctx->dconf->pe) {
+			unsigned int corrupted_input = ctx->corrupted_input;
+			ret = cli_scanpe_hnmavocl(ctx);
+			ctx->corrupted_input = corrupted_input;
+		}
+		perf_nested_stop(ctx, PERFT_PE, PERFT_SCAN);
+		break;
+	default:
+		break;
+	}
+
+	if (ret == CL_VIRUS)
+		ret = cli_checkfp(hash, hashed_size, ctx);
+	ctx->recursion--;
+	cli_bitset_free(ctx->hook_lsig_matches);
+	ctx->hook_lsig_matches = old_hook_lsig_matches;
+
+	switch (ret) {
+		/* Malformed file cases */
+	case CL_EFORMAT:
+	case CL_EREAD:
+	case CL_EUNPACK:
+		/* Limits exceeded */
+	case CL_EMAXREC:
+	case CL_EMAXSIZE:
+	case CL_EMAXFILES:
+		cli_dbgmsg("Descriptor[%d]: %s\n", fmap_fd(*ctx->fmap), cl_strerror(ret));
+		ret_from_magicscan(CL_CLEAN);
+	case CL_CLEAN:
+		cache_clean = 1;
+		ret_from_magicscan(CL_CLEAN);
+	default:
+		ret_from_magicscan(ret);
+	}
+}
+
+/* File scanning supported hnmavocl */
+static int cli_base_scandesc_hnmavocl(int desc, cli_ctx *ctx, cli_file_t type)
+{
+	STATBUF sb;
+	int ret;
+
+#ifdef HAVE__INTERNAL__SHA_COLLECT
+	if (ctx->sha_collect>0) ctx->sha_collect = 0;
+#endif
+	cli_dbgmsg("in cli_magic_scandesc (reclevel: %u/%u)\n", ctx->recursion, ctx->engine->maxreclevel);
+	if (FSTAT(desc, &sb) == -1) {
+		cli_errmsg("magic_scandesc: Can't fstat descriptor %d\n", desc);
+		early_ret_from_magicscan(CL_ESTAT);
+	}
+	if (sb.st_size <= 5) {
+		cli_dbgmsg("Small data (%u bytes)\n", (unsigned int)sb.st_size);
+		early_ret_from_magicscan(CL_CLEAN);
+	}
+
+	ctx->fmap++;
+	perf_start(ctx, PERFT_MAP);
+	if (!(*ctx->fmap = fmap(desc, 0, sb.st_size))) {
+		cli_errmsg("CRITICAL: fmap() failed\n");
+		ctx->fmap--;
+		perf_stop(ctx, PERFT_MAP);
+		early_ret_from_magicscan(CL_EMEM);
+	}
+	perf_stop(ctx, PERFT_MAP);
+
+	ret = magic_scandesc_hnmavocl(ctx, type);
+
+	funmap(*ctx->fmap);
+	ctx->fmap--;
+	return ret;
+}
+
+int cli_magic_scandesc_hnmavocl(int desc, cli_ctx *ctx)
+{
+	return cli_base_scandesc_hnmavocl(desc, ctx, CL_TYPE_ANY);
+}
+
 /* Have to keep partition typing separate */
 int cli_partition_scandesc(int desc, cli_ctx *ctx)
 {
@@ -3185,9 +3369,100 @@ int cl_scandesc_callback(int desc, const char **virname, unsigned long int *scan
     return scan_common(desc, NULL, virname, scanned, engine, scanoptions, context);
 }
 
+/* File scanning supported HNMAV-OCL*/
+static int scan_common_hnmavocl(int desc, 
+	cl_fmap_t *map, 
+	const char **virname, 
+	unsigned long int *scanned, 
+	const struct cl_engine *engine, 
+	unsigned int scanoptions, 
+	void *context)
+{
+	cli_ctx ctx;
+	int rc;
+
+	//memset(&ctx, '\0', sizeof(cli_ctx));
+	
+	
+	ctx.engine = engine;
+	ctx.virname = virname;
+	ctx.scanned = scanned;
+	ctx.options = scanoptions;
+#if 0 /* for development testing only */
+	ctx.options |= CL_SCAN_ALLMATCHES;
+#endif
+	ctx.found_possibly_unwanted = 0;
+	ctx.container_type = CL_TYPE_ANY;
+	ctx.container_size = 0;
+	ctx.dconf = (struct cli_dconf *) engine->dconf;
+	ctx.cb_ctx = context;
+	ctx.fmap = cli_calloc(sizeof(fmap_t *), ctx.engine->maxreclevel + 2);
+
+	if (!ctx.fmap)
+		return CL_EMEM;
+	if (!(ctx.hook_lsig_matches = cli_bitset_init())) {
+		free(ctx.fmap);
+		return CL_EMEM;
+	}
+	
+
+	perf_init(&ctx);
+
+#ifdef HAVE__INTERNAL__SHA_COLLECT
+	if (scanoptions & CL_SCAN_INTERNAL_COLLECT_SHA) {
+		char link[32];
+		ssize_t linksz;
+
+
+		snprintf(link, sizeof(link), "/proc/self/fd/%u", desc);
+		link[sizeof(link)-1] = '\0';
+		if ((linksz = readlink(link, ctx.entry_filename, sizeof(ctx.entry_filename) - 1)) == -1) {
+			cli_errmsg("failed to resolve filename for descriptor %d (%s)\n", desc, link);
+			strcpy(ctx.entry_filename, "NO_IDEA");
+		}
+		else
+			ctx.entry_filename[linksz] = '\0';
+	} while (0);
+#endif
+
+	cli_logg_setup(&ctx);
+	//rc = map ? cli_map_scandesc(map, 0, map->len, &ctx) : cli_magic_scandesc(desc, &ctx);
+	if (map){
+		rc = cli_map_scandesc(map, 0, map->len, &ctx);
+		cli_dbgmsg("scan_common_hnmavocl, program processes in map \n");
+	}
+	rc = cli_magic_scandesc_hnmavocl(desc, &ctx);
+
+	if (ctx.options & CL_SCAN_ALLMATCHES) {
+		*virname = (char *)ctx.virname; /* temp hack for scanall mode until api augmentation */
+		if (rc == CL_CLEAN && ctx.num_viruses)
+			rc = CL_VIRUS;
+	}
+
+	cli_bitset_free(ctx.hook_lsig_matches);
+	free(ctx.fmap);
+	if (rc == CL_CLEAN && ctx.found_possibly_unwanted)
+		rc = CL_VIRUS;
+	cli_logg_unsetup();
+	perf_done(&ctx);
+	return rc;
+}
+
+/* Function call back supported HNMAV-OCL*/
+// file map is NULL
+int cl_scandesc_callback_hnmavocl(int desc,
+	const char **virname,
+	unsigned long int *scanned,
+	const struct cl_engine *engine,
+	unsigned int scanoptions,
+	void *context)
+{
+	return scan_common_hnmavocl(desc, NULL, virname, scanned, engine, scanoptions, context);
+}
+
 int cl_scanmap_callback(cl_fmap_t *map, const char **virname, unsigned long int *scanned, const struct cl_engine *engine, unsigned int scanoptions, void *context)
 {
-    return scan_common(-1, map, virname, scanned, engine, scanoptions, context);
+	return scan_common(-1, map, virname, scanned, engine, scanoptions, context);
 }
 
 int cli_found_possibly_unwanted(cli_ctx* ctx)

@@ -30,6 +30,7 @@
 #define _SHA1_H
 
 #include "cltypes.h"
+#include "stdint.h"
 
 #define SHA1_HASH_SIZE 20
 

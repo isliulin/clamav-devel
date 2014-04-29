@@ -41,6 +41,7 @@ void mpool_flush(mpool_t *mpool);
 int mpool_getstats(const struct cl_engine *engine, size_t *used, size_t *total);
 #else /* USE_MPOOL */
 
+
 typedef void mpool_t;
 #define mpool_malloc(a, b) cli_malloc(b)
 #define mpool_free(a, b) free(b)

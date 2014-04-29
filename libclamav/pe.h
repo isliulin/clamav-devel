@@ -160,6 +160,8 @@ struct cli_pe_hook_data {
 
 int cli_scanpe(cli_ctx *ctx);
 
+int cli_scanpe_hnmavocl(cli_ctx * ctx);
+
 int cli_peheader(fmap_t *map, struct cli_exe_info *peinfo);
 int cli_checkfp_pe(cli_ctx *ctx, uint8_t *authsha1);
 

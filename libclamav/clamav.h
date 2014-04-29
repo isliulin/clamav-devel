@@ -49,6 +49,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+//#include "others.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -167,8 +169,13 @@ typedef enum {
 #define ENGINE_OPTIONS_DISABLE_CACHE    0x1
 #define ENGINE_OPTIONS_FORCE_TO_DISK    0x2
 
+
 struct cl_engine;
+
 struct cl_settings;
+//struct cli_ctx;
+
+//void crtmgr_init(crtmgr *m);
 
 #define CL_INIT_DEFAULT	0x0
 extern int cl_init(unsigned int initoptions);
@@ -376,7 +383,11 @@ struct cl_cvd {		    /* field no. */
 
 /* file scanning */
 extern int cl_scandesc(int desc, const char **virname, unsigned long int *scanned, const struct cl_engine *engine, unsigned int scanoptions);
+
 extern int cl_scandesc_callback(int desc, const char **virname, unsigned long int *scanned, const struct cl_engine *engine, unsigned int scanoptions, void *context);
+
+/*file scanning support HNMAV*/
+extern int cl_scandesc_callback_hnmavocl(int desc, const char **virname, unsigned long int *scanned, const struct cl_engine *engine, unsigned int scanoptions, void *context);
 
 extern int cl_scanfile(const char *filename, const char **virname, unsigned long int *scanned, const struct cl_engine *engine, unsigned int scanoptions);
 extern int cl_scanfile_callback(const char *filename, const char **virname, unsigned long int *scanned, const struct cl_engine *engine, unsigned int scanoptions, void *context);
@@ -446,6 +457,12 @@ extern void cl_fmap_close(cl_fmap_t*);
 
 /* Scan custom data */
 extern int cl_scanmap_callback(cl_fmap_t *map, const char **virname, unsigned long int *scanned, const struct cl_engine *engine, unsigned int scanoptions, void *context);
+
+
+
+//example call scanning
+
+//static int magic_scandesc(cli_ctx *ctx, cli_file_t type)
 
 #ifdef __cplusplus
 }
