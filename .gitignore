@@ -68,5 +68,14 @@ sigtool/
 sigtool/*
 win32/clamav-for-windows/
 win32/clamav-for-windows/*
+examples/
+examples/*
+freshclam/
+freshclam/*
+etc/
+etc/*
+contrib/
+contrib/*
+
 
 
