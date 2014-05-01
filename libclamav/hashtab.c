@@ -823,7 +823,7 @@ int cli_hashset_contains(const struct cli_hashset* hs, const uint32_t key)
 	return BITMAP_CONTAINS(hs->bitmap, idx);
 }
 
-ssize_t cli_hashset_toarray(const struct cli_hashset* hs, uint32_t** array)
+size_t cli_hashset_toarray(const struct cli_hashset* hs, uint32_t** array)
 {
 	size_t i, j;
 	uint32_t* arr;

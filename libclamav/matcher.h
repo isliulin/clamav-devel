@@ -139,8 +139,9 @@ struct cli_mtarget {
 };
 
 #define CLI_MTARGETS 13
+
 static const struct cli_mtarget cli_mtargets[CLI_MTARGETS] =  {
-    { 0,                    "GENERIC",      0,  0, 1 },
+	{ CL_TYPE_ANY, "GENERIC", 0, 0, 1 },
     { CL_TYPE_MSEXE,        "PE",           1,  0, 1 },
     { CL_TYPE_MSOLE2,       "OLE2",         2,  1, 0 },
     { CL_TYPE_HTML,         "HTML",         3,  1, 0 },

@@ -3381,9 +3381,7 @@ static int scan_common_hnmavocl(int desc,
 	cli_ctx ctx;
 	int rc;
 
-	//memset(&ctx, '\0', sizeof(cli_ctx));
-	
-	
+	memset(&ctx, '\0', sizeof(cli_ctx));
 	ctx.engine = engine;
 	ctx.virname = virname;
 	ctx.scanned = scanned;

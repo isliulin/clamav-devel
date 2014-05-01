@@ -49,7 +49,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-//#include "others.h"
+#include "shared/output.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -463,6 +463,8 @@ extern int cl_scanmap_callback(cl_fmap_t *map, const char **virname, unsigned lo
 //example call scanning
 
 //static int magic_scandesc(cli_ctx *ctx, cli_file_t type)
+
+extern const char *logg_file;
 
 #ifdef __cplusplus
 }

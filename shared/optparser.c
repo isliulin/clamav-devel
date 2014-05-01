@@ -1122,7 +1122,7 @@ struct optstruct *optparse(const char *cfgfile, int argc, char **argv, int verbo
 	}
     }
 
-    /* optprint(opts); */
+   //  optprint(opts);
 
     return opts;
 }

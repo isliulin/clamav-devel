@@ -87,9 +87,17 @@ const char *logg_file = NULL;
 #if defined(USE_SYSLOG) && !defined(C_AIX)
 short logg_syslog;
 #endif
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 short int mprintf_disabled = 0, mprintf_verbose = 0, mprintf_quiet = 0,
 	  mprintf_stdout = 0, mprintf_nowarn = 0, mprintf_send_timeout = 100;
+
+#ifdef __cplusplus
+}
+#endif
 
 #define ARGLEN(args, str, len)			    \
 {						    \

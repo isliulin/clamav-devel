@@ -20,10 +20,12 @@
 
 #ifndef __MISC_H
 #define __MISC_H
+
 #ifndef _WIN32
 #include <sys/types.h>
 #include <netdb.h>
 #include <netinet/in.h>
+
 #endif
 #include "optparser.h"
 /* Maximum filenames under various systems - njh */
@@ -41,6 +43,10 @@
 
 #ifndef PATH_MAX
 #define PATH_MAX 1024
+#endif
+
+#ifndef HAVE_IN_ADDR_T
+typedef	unsigned	int	in_addr_t;
 #endif
 
 char *freshdbdir(void);
