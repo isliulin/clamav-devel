@@ -66,5 +66,7 @@ clamdtop/
 clamdtop/*
 sigtool/
 sigtool/*
+win32/clamav-for-windows/
+win32/clamav-for-windows/*
 
 
