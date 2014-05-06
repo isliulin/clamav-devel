@@ -76,6 +76,7 @@ etc/
 etc/*
 contrib/
 contrib/*
-
+build/
+build/*
 
 
