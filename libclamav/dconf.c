@@ -414,5 +414,5 @@ int cli_dconf_load(FILE *fs, struct cl_engine *engine, unsigned int options, str
 	return ret;
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }

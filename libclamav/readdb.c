@@ -162,7 +162,7 @@ int cli_parse_add(struct cli_matcher *root, const char *virname, const char *hex
 	    free(patt);
 	    return ret;
 	}
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
     if((wild = strchr(hexsig, '{'))) {
 	if(sscanf(wild, "%c%u%c", &l, &range, &r) == 3 && l == '{' && r == '}' && range > 0 && range < 128) {
@@ -341,7 +341,7 @@ int cli_parse_add(struct cli_matcher *root, const char *virname, const char *hex
 	}
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cli_initroots(struct cl_engine *engine, unsigned int options)
@@ -382,7 +382,7 @@ int cli_initroots(struct cl_engine *engine, unsigned int options)
 	}
     }
     engine->root[1]->bm_offmode = 1; /* BM offset mode for PE files */
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 char *cli_dbgets(char *buff, unsigned int size, FILE *fs, struct cli_dbio *dbio)
@@ -611,7 +611,7 @@ static int cli_loaddb(FILE *fs, struct cl_engine *engine, unsigned int *signo, u
     if(signo)
 	*signo += sigs;
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 #define ICO_TOKENS 4
@@ -620,7 +620,7 @@ static int cli_loadidb(FILE *fs, struct cl_engine *engine, unsigned int *signo, 
         const char *tokens[ICO_TOKENS + 1];
 	char buffer[FILEBUFF], *buffer_cpy = NULL;
 	uint8_t *hash;
-	int ret = CL_SUCCESS;
+	int ret = CL_SUCCESS_T;
 	unsigned int line = 0, sigs = 0, tokens_count, i, size, enginesize;
 	struct icomtr *metric;
 	struct icon_matcher *matcher;
@@ -845,7 +845,7 @@ static int cli_loadidb(FILE *fs, struct cl_engine *engine, unsigned int *signo, 
 	*signo += sigs;
 
     engine->iconcheck = matcher;
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static int cli_loadwdb(FILE *fs, struct cl_engine *engine, unsigned int options, struct cli_dbio *dbio)
@@ -854,7 +854,7 @@ static int cli_loadwdb(FILE *fs, struct cl_engine *engine, unsigned int options,
 
 
     if(!(engine->dconf->phishing & PHISHING_CONF_ENGINE))
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 
     if(!engine->whitelist_matcher) {
 	if((ret = init_whitelist(engine))) {
@@ -866,7 +866,7 @@ static int cli_loadwdb(FILE *fs, struct cl_engine *engine, unsigned int options,
 	return ret;
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static int cli_loadpdb(FILE *fs, struct cl_engine *engine, unsigned int *signo, unsigned int options, struct cli_dbio *dbio)
@@ -875,7 +875,7 @@ static int cli_loadpdb(FILE *fs, struct cl_engine *engine, unsigned int *signo, 
 
 
     if(!(engine->dconf->phishing & PHISHING_CONF_ENGINE))
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 
     if(!engine->domainlist_matcher) {
 	if((ret = init_domainlist(engine))) {
@@ -887,7 +887,7 @@ static int cli_loadpdb(FILE *fs, struct cl_engine *engine, unsigned int *signo, 
 	return ret;
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 #define NDB_TOKENS 6
@@ -1013,7 +1013,7 @@ static int cli_loadndb(FILE *fs, struct cl_engine *engine, unsigned int *signo, 
 	cli_dbgmsg("*** Self protection mechanism activated.\n");
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 struct lsig_attrib {
@@ -1248,18 +1248,18 @@ static int load_oneldb(char *buffer, int chkpua, struct cl_engine *engine, unsig
     logic = tokens[2];
 
     if (chkpua && cli_chkpua(virname, engine->pua_cats, options))
-	    return CL_SUCCESS;
+	    return CL_SUCCESS_T;
 
     if (engine->ignored && cli_chkign(engine->ignored, virname, buffer_cpy ? buffer_cpy : virname)) {
 	if(skip)
 	    *skip = 1;
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     if(engine->cb_sigload && engine->cb_sigload("ldb", virname, ~options & CL_DB_OFFICIAL, engine->cb_sigload_ctx)) {
 	cli_dbgmsg("cli_loadldb: skipping %s due to callback\n", virname);
 	(*sigs)--;
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     subsigs = cli_ac_chklsig(logic, logic + strlen(logic), NULL, NULL, NULL, 1);
@@ -1295,7 +1295,7 @@ static int load_oneldb(char *buffer, int chkpua, struct cl_engine *engine, unsig
 	if(ret == 1) {
 	    cli_dbgmsg("cli_loadldb: Not supported attribute(s) in logical signature for %s, skipping\n", virname);
 	    (*sigs)--;
-	    return CL_SUCCESS;
+	    return CL_SUCCESS_T;
 	}
 	return CL_EMALFDB;
     }
@@ -1305,11 +1305,11 @@ static int load_oneldb(char *buffer, int chkpua, struct cl_engine *engine, unsig
 	    cli_dbgmsg("cli_loadldb: Signature for %s not loaded (required f-level: %u)\n", virname, tdb.engine[0]);
 	    FREE_TDB(tdb);
 	    (*sigs)--;
-	    return CL_SUCCESS;
+	    return CL_SUCCESS_T;
 	} else if(tdb.engine[1] < cl_retflevel()) {
 	    FREE_TDB(tdb);
 	    (*sigs)--;
-	    return CL_SUCCESS;
+	    return CL_SUCCESS_T;
 	}
     }
 
@@ -1321,7 +1321,7 @@ static int load_oneldb(char *buffer, int chkpua, struct cl_engine *engine, unsig
 	cli_dbgmsg("cli_loadldb: Not supported target type in logical signature for %s, skipping\n", virname);
 	FREE_TDB(tdb);
 	(*sigs)--;
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     if((tdb.icongrp1 || tdb.icongrp2) && tdb.target[0] != 1) {
@@ -1396,7 +1396,7 @@ static int load_oneldb(char *buffer, int chkpua, struct cl_engine *engine, unsig
 	}
     }
     memcpy(&lsig->tdb, &tdb, sizeof(tdb));
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static int cli_loadldb(FILE *fs, struct cl_engine *engine, unsigned int *signo, unsigned int options, struct cli_dbio *dbio, const char *dbname)
@@ -1445,7 +1445,7 @@ static int cli_loadldb(FILE *fs, struct cl_engine *engine, unsigned int *signo, 
     if(signo)
 	*signo += sigs;
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static int cli_loadcbc(FILE *fs, struct cl_engine *engine, unsigned int *signo, unsigned int options, struct cli_dbio *dbio, const char *dbname)
@@ -1464,18 +1464,18 @@ static int cli_loadcbc(FILE *fs, struct cl_engine *engine, unsigned int *signo, 
 	return rc;
 
     if(!(engine->dconf->bytecode & BYTECODE_ENGINE_MASK)) {
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     if(engine->cb_sigload && engine->cb_sigload("cbc", dbname, ~options & CL_DB_OFFICIAL, engine->cb_sigload_ctx)) {
 	cli_dbgmsg("cli_loadcbc: skipping %s due to callback\n", dbname);
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     if (!(options & CL_DB_BYTECODE_UNSIGNED) && !(options & CL_DB_SIGNED)) {
 	cli_warnmsg("Only loading signed bytecode, skipping load of unsigned bytecode!\n");
 	cli_warnmsg("Turn on BytecodeUnsigned/--bytecode-unsigned to enable loading of unsigned bytecode\n");
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     bcs->all_bcs = cli_realloc2(bcs->all_bcs, sizeof(*bcs->all_bcs)*(bcs->count+1));
@@ -1499,7 +1499,7 @@ static int cli_loadcbc(FILE *fs, struct cl_engine *engine, unsigned int *signo, 
      * file */
     while (cli_dbgets(buf, sizeof(buf), fs, dbio)) {}
 
-    if (rc != CL_SUCCESS) {
+    if (rc != CL_SUCCESS_T) {
 	cli_bytecode_destroy(bc);
 	cli_errmsg("Unable to load %s bytecode: %s\n", dbname, cl_strerror(rc));
 	return rc;
@@ -1507,7 +1507,7 @@ static int cli_loadcbc(FILE *fs, struct cl_engine *engine, unsigned int *signo, 
     if (bc->state == bc_skip) {
 	cli_bytecode_destroy(bc);
 	bcs->count--;
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
     bc->id = bcs->count;/* must set after _load, since load zeroes */
     if (engine->bytecode_mode == CL_BYTECODE_MODE_TEST)
@@ -1520,7 +1520,7 @@ static int cli_loadcbc(FILE *fs, struct cl_engine *engine, unsigned int *signo, 
 	}
 	cli_dbgmsg("Bytecode %s(%u) has logical signature: %s\n", dbname, bc->id, bc->lsig);
 	rc = load_oneldb(bc->lsig, 0, engine, options, dbname, 0, &sigs, bcs->count, NULL, &skip);
-	if (rc != CL_SUCCESS) {
+	if (rc != CL_SUCCESS_T) {
 	    cli_errmsg("Problem parsing logical signature %s for bytecode %s: %s\n",
 		       bc->lsig, dbname, cl_strerror(rc));
 	    return rc;
@@ -1528,7 +1528,7 @@ static int cli_loadcbc(FILE *fs, struct cl_engine *engine, unsigned int *signo, 
 	if (skip) {
 	    cli_bytecode_destroy(bc);
 	    bcs->count--;
-	    return CL_SUCCESS;
+	    return CL_SUCCESS_T;
 	}
         if (sigs != oldsigs) {
           /* compiler ensures Engine field in lsig matches the one in bytecode,
@@ -1577,7 +1577,7 @@ static int cli_loadcbc(FILE *fs, struct cl_engine *engine, unsigned int *signo, 
     }
     if (signo)
 	*signo += sigs;
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 #define FTM_TOKENS 8
@@ -1710,7 +1710,7 @@ static int cli_loadftm(FILE *fs, struct cl_engine *engine, unsigned int options,
     }
 
     cli_dbgmsg("Loaded %u filetype definitions\n", sigs);
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 #define INFO_NSTR "11088894983048545473659556106627194923928941791795047620591658697413581043322715912172496806525381055880964520618400224333320534660299233983755341740679502866829909679955734391392668378361221524205396631090105151641270857277080310734320951653700508941717419168723942507890702904702707587451621691050754307850383399865346487203798464178537392211402786481359824461197231102895415093770394216666324484593935762408468516826633192140826667923494822045805347809932848454845886971706424360558667862775876072059437703365380209101697738577515476935085469455279994113145977994084618328482151013142393373316337519977244732747977"
@@ -1723,7 +1723,7 @@ static int cli_loadinfo(FILE *fs, struct cl_engine *engine, unsigned int options
 	unsigned int line = 0, tokens_count, len;
 	unsigned char hash[32];
         struct cli_dbinfo *last = NULL, *new;
-	int ret = CL_SUCCESS, dsig = 0;
+	int ret = CL_SUCCESS_T, dsig = 0;
 	SHA256_CTX ctx;
 
 
@@ -1737,7 +1737,7 @@ static int cli_loadinfo(FILE *fs, struct cl_engine *engine, unsigned int options
 	if(!(options & CL_DB_UNSIGNED) && !strncmp(buffer, "DSIG:", 5)) {
 	    dsig = 1;
 	    sha256_final(&ctx, hash);
-	    if(cli_versig2(hash, buffer + 5, INFO_NSTR, INFO_ESTR) != CL_SUCCESS) {
+	    if(cli_versig2(hash, buffer + 5, INFO_NSTR, INFO_ESTR) != CL_SUCCESS_T) {
 		cli_errmsg("cli_loadinfo: Incorrect digital signature\n");
 		ret = CL_EMALFDB;
 	    }
@@ -1828,7 +1828,7 @@ static int cli_loadinfo(FILE *fs, struct cl_engine *engine, unsigned int options
 	return ret;
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 #define IGN_MAX_TOKENS   3
@@ -1838,7 +1838,7 @@ static int cli_loadign(FILE *fs, struct cl_engine *engine, unsigned int options,
 	char buffer[FILEBUFF];
 	unsigned int line = 0, tokens_count, len;
         struct cli_bm_patt *new;
-	int ret = CL_SUCCESS;
+	int ret = CL_SUCCESS_T;
 
     if(!engine->ignored) {
 	engine->ignored = (struct cli_matcher *) mpool_calloc(engine->mempool, 1, sizeof(struct cli_matcher));
@@ -1916,7 +1916,7 @@ static int cli_loadign(FILE *fs, struct cl_engine *engine, unsigned int options,
 	return ret;
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 #define MD5_HDB	    0
@@ -1929,7 +1929,7 @@ static int cli_loadhash(FILE *fs, struct cl_engine *engine, unsigned int *signo,
     const char *tokens[MD5_TOKENS + 1];
     char buffer[FILEBUFF], *buffer_cpy = NULL;
     const char *pt, *virname;
-    int ret = CL_SUCCESS;
+    int ret = CL_SUCCESS_T;
     unsigned int size_field = 1, md5_field = 0, line = 0, sigs = 0, tokens_count;
     unsigned int req_fl = 0; 
     struct cli_matcher *db;
@@ -2063,7 +2063,7 @@ static int cli_loadhash(FILE *fs, struct cl_engine *engine, unsigned int *signo,
     if(signo)
 	*signo += sigs;
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 #define MD_TOKENS 9
@@ -2072,7 +2072,7 @@ static int cli_loadmd(FILE *fs, struct cl_engine *engine, unsigned int *signo, i
 	const char *tokens[MD_TOKENS + 1];
 	char buffer[FILEBUFF], *buffer_cpy = NULL;
 	unsigned int line = 0, sigs = 0, tokens_count;
-	int ret = CL_SUCCESS;
+	int ret = CL_SUCCESS_T;
 	struct cli_cdb *new;
 
 
@@ -2214,7 +2214,7 @@ static int cli_loadmd(FILE *fs, struct cl_engine *engine, unsigned int *signo, i
     if(signo)
 	*signo += sigs;
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 /*    0		 1		2		3	         4	       5	      6	      7	      8   9    10     11
@@ -2227,7 +2227,7 @@ static int cli_loadcdb(FILE *fs, struct cl_engine *engine, unsigned int *signo, 
 	const char *tokens[CDB_TOKENS + 1];
 	char buffer[FILEBUFF], *buffer_cpy = NULL;
 	unsigned int line = 0, sigs = 0, tokens_count, n0, n1;
-	int ret = CL_SUCCESS;
+	int ret = CL_SUCCESS_T;
 	struct cli_cdb *new;
 
 
@@ -2329,7 +2329,7 @@ static int cli_loadcdb(FILE *fs, struct cl_engine *engine, unsigned int *signo, 
 		else							    \
 		    dest[0] = dest[1] = atoi(token_str);		    \
 	    }								    \
-	    if(ret != CL_SUCCESS) {					    \
+	    if(ret != CL_SUCCESS_T) {					    \
 		cli_errmsg("cli_loadcdb: Invalid value %s in signature for %s\n",\
 		    token_str, tokens[0]);				    \
 		if(new->name.re_magic)					    \
@@ -2396,7 +2396,7 @@ static int cli_loadcdb(FILE *fs, struct cl_engine *engine, unsigned int *signo, 
     if(signo)
 	*signo += sigs;
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 /* 
@@ -2410,7 +2410,7 @@ static int cli_loadcrt(FILE *fs, struct cl_engine *engine, struct cli_dbio *dbio
     char *tokens[CRT_TOKENS+1];
     size_t line=0, tokens_count, i, j;
     cli_crt ca;
-    int ret=CL_SUCCESS;
+    int ret=CL_SUCCESS_T;
     char *subject=NULL, *pubkey=NULL, *exponent=NULL, *serial=NULL;
     const uint8_t exp[] = "\x01\x00\x01";
     char c;
@@ -2593,7 +2593,7 @@ static int cli_loaddbdir(const char *dirname, struct cl_engine *engine, unsigned
 int cli_load(const char *filename, struct cl_engine *engine, unsigned int *signo, unsigned int options, struct cli_dbio *dbio)
 {
 	FILE *fs = NULL;
-	int ret = CL_SUCCESS;
+	int ret = CL_SUCCESS_T;
 	uint8_t skipped = 0;
 	const char *dbname;
 	char buff[FILEBUFF];
@@ -2601,7 +2601,7 @@ int cli_load(const char *filename, struct cl_engine *engine, unsigned int *signo
 
     if(dbio && dbio->chkonly) {
 	while(cli_dbgets(buff, FILEBUFF, NULL, dbio));
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     if(!dbio && (fs = fopen(filename, "rb")) == NULL) {
@@ -2609,7 +2609,7 @@ int cli_load(const char *filename, struct cl_engine *engine, unsigned int *signo
 	    if(access(filename, R_OK)) {
 		if(errno == ENOENT) {
 		    cli_dbgmsg("Detected race condition, ignoring old file %s\n", filename);
-		    return CL_SUCCESS;
+		    return CL_SUCCESS_T;
 		}
 	    }
 	}
@@ -3098,7 +3098,7 @@ int cl_statinidir(const char *dirname, struct cl_stat *dbstat)
     }
 
     closedir(dd);
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cl_statchkdir(const struct cl_stat *dbstat)
@@ -3172,7 +3172,7 @@ int cl_statchkdir(const struct cl_stat *dbstat)
     }
 
     closedir(dd);
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cl_statfree(struct cl_stat *dbstat)
@@ -3209,7 +3209,7 @@ int cl_statfree(struct cl_stat *dbstat)
 	return CL_ENULLARG;
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cl_engine_free(struct cl_engine *engine)
@@ -3234,7 +3234,7 @@ int cl_engine_free(struct cl_engine *engine)
 #ifdef CL_THREAD_SAFE
 	pthread_mutex_unlock(&cli_ref_mutex);
 #endif
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
 #ifdef CL_THREAD_SAFE
@@ -3355,7 +3355,7 @@ int cl_engine_free(struct cl_engine *engine)
     if(engine->mempool) mpool_destroy(engine->mempool);
 #endif
     free(engine);
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cl_engine_compile(struct cl_engine *engine)
@@ -3409,7 +3409,7 @@ int cl_engine_compile(struct cl_engine *engine)
     }
 
     engine->dboptions |= CL_DB_COMPILED;
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cl_engine_addref(struct cl_engine *engine)
@@ -3429,7 +3429,7 @@ int cl_engine_addref(struct cl_engine *engine)
     pthread_mutex_unlock(&cli_ref_mutex);
 #endif
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static int countentries(const char *dbname, unsigned int *sigs)
@@ -3450,7 +3450,7 @@ static int countentries(const char *dbname, unsigned int *sigs)
     }
     fclose(fs);
     *sigs += entry;
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static int countsigs(const char *dbname, unsigned int options, unsigned int *sigs)
@@ -3476,7 +3476,7 @@ static int countsigs(const char *dbname, unsigned int options, unsigned int *sig
 	return countentries(dbname, sigs);
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cl_countsigs(const char *path, unsigned int countoptions, unsigned int *sigs)
@@ -3521,7 +3521,7 @@ int cl_countsigs(const char *path, unsigned int countoptions, unsigned int *sigs
 		    snprintf(fname, sizeof(fname), "%s"PATHSEP"%s", path, dent->d_name);
 		    fname[sizeof(fname) - 1] = 0;
 		    ret = countsigs(fname, countoptions, sigs);
-		    if(ret != CL_SUCCESS) {
+		    if(ret != CL_SUCCESS_T) {
 			closedir(dd);
 			return ret;
 		    }
@@ -3534,5 +3534,5 @@ int cl_countsigs(const char *path, unsigned int countoptions, unsigned int *sigs
 	return CL_EARG;
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }

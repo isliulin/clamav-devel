@@ -251,7 +251,7 @@ int cli_scanishield_msi(cli_ctx *ctx, off_t off) {
 	    key[i] ^= skey[i & 3];
 	memset(&z, 0, sizeof(z));
 	inflateInit(&z);
-	ret = CL_SUCCESS;
+	ret = CL_SUCCESS_T;
 	while(csize) {
 	    uint8_t buf2[BUFSIZ];
 	    z.avail_in = MIN(csize, sizeof(buf2));
@@ -295,7 +295,7 @@ int cli_scanishield_msi(cli_ctx *ctx, off_t off) {
 
 	inflateEnd(&z);
 
-	if (ret == CL_SUCCESS) {
+	if (ret == CL_SUCCESS_T) {
 	    cli_dbgmsg("ishield-msi: extracted to %s\n", tempfile);
 
 	    if (lseek(ofd, 0, SEEK_SET) == -1) {

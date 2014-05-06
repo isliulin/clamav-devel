@@ -236,7 +236,7 @@ int cli_caloff(const char *offstr, const struct cli_target_info *info, unsigned 
 
 	if(!strcmp(offstr, "*")) {
 	    offdata[0] = *offset_max = *offset_min = CLI_OFF_ANY;
-	    return CL_SUCCESS;
+	    return CL_SUCCESS_T;
 	}
 
 	if(strlen(offstr) > 64) {
@@ -341,7 +341,7 @@ int cli_caloff(const char *offstr, const struct cli_target_info *info, unsigned 
 	if(offset_max)
 	    *offset_max = CLI_OFF_NONE;
 	if(info->status == -1)
-	    return CL_SUCCESS;
+	    return CL_SUCCESS_T;
 
 	switch(offdata[0]) {
 	    case CLI_OFF_EOF_MINUS:
@@ -390,7 +390,7 @@ int cli_caloff(const char *offstr, const struct cli_target_info *info, unsigned 
 	    *offset_max = *offset_min + offdata[2];
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 void cli_targetinfo(struct cli_target_info *info, unsigned int target, fmap_t *map)

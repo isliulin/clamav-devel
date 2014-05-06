@@ -60,10 +60,10 @@ int cli_binhex(cli_ctx *ctx) {
     cli_dbgmsg("in cli_binhex\n");
     if(!map->len) return CL_CLEAN;
 
-    if((ret = cli_gentempfd(ctx->engine->tmpdir, &dname, &datafd)) != CL_SUCCESS)
+    if((ret = cli_gentempfd(ctx->engine->tmpdir, &dname, &datafd)) != CL_SUCCESS_T)
 	return ret;
 
-    if((ret = cli_gentempfd(ctx->engine->tmpdir, &rname, &resfd)) != CL_SUCCESS) {
+    if((ret = cli_gentempfd(ctx->engine->tmpdir, &rname, &resfd)) != CL_SUCCESS_T) {
 	close(datafd);
 	if(cli_unlink(dname)) ret = CL_EUNLINK;
 	free(dname);

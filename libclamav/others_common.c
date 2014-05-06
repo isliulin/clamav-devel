@@ -556,7 +556,7 @@ static int handle_filetype(const char *fname, int flags,
     if (*stated == -1) {
 	/*  we failed a stat() or lstat() */
 	ret = callback(NULL, NULL, fname, error_stat, data);
-	if (ret != CL_SUCCESS)
+	if (ret != CL_SUCCESS_T)
 	    return ret;
 	*ft = ft_unknown;
     } else if (*ft == ft_skipped_link || *ft == ft_skipped_special) {
@@ -564,10 +564,10 @@ static int handle_filetype(const char *fname, int flags,
 	ret = callback(stated ? statbuf : NULL, NULL, fname,
 		       *ft == ft_skipped_link ?
 		       warning_skipped_link : warning_skipped_special, data);
-	if (ret != CL_SUCCESS)
+	if (ret != CL_SUCCESS_T)
 	    return ret;
     }
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static int cli_ftw_dir(const char *dirname, int flags, int maxdepth, cli_ftw_cb callback, struct cli_ftw_cbdata *data, cli_ftw_pathchk pathchk);
@@ -600,19 +600,19 @@ int cli_ftw(char *path, int flags, int maxdepth, cli_ftw_cb callback, struct cli
 	*pathend = '\0';
     }
     if(pathchk && pathchk(path, data) == 1)
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     ret = handle_filetype(path, flags, &statbuf, &stated, &ft, callback, data);
-    if (ret != CL_SUCCESS)
+    if (ret != CL_SUCCESS_T)
 	return ret;
     if (ft_skipped(ft))
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     entry.statbuf = stated ? &statbuf : NULL;
     entry.is_dir = ft == ft_directory;
     entry.filename = entry.is_dir ? NULL : strdup(path);
     entry.dirname = entry.is_dir ? path : NULL;
     if (entry.is_dir) {
 	ret = callback(entry.statbuf, NULL, path, visit_directory_toplev, data);
-	if (ret != CL_SUCCESS)
+	if (ret != CL_SUCCESS_T)
 	    return ret;
     }
     return handle_entry(&entry, flags, maxdepth, callback, data, pathchk);
@@ -641,7 +641,7 @@ static int cli_ftw_dir(const char *dirname, int flags, int maxdepth, cli_ftw_cb 
 	struct dirent *dent;
 	int err;
 	errno = 0;
-	ret = CL_SUCCESS;
+	ret = CL_SUCCESS_T;
 #ifdef HAVE_READDIR_R_3
 	while(!(err = readdir_r(dd, &result.d, &dent)) && dent) {
 #elif defined(HAVE_READDIR_R_2)
@@ -687,7 +687,7 @@ static int cli_ftw_dir(const char *dirname, int flags, int maxdepth, cli_ftw_cb 
 	    fname = (char *) cli_malloc(strlen(dirname) + strlen(dent->d_name) + 2);
 	    if(!fname) {
 		ret = callback(NULL, NULL, dirname, error_mem, data);
-		if (ret != CL_SUCCESS)
+		if (ret != CL_SUCCESS_T)
 		    break;
 		continue; /* have to skip this one if continuing after error */
 	    }
@@ -702,7 +702,7 @@ static int cli_ftw_dir(const char *dirname, int flags, int maxdepth, cli_ftw_cb 
 	    }
 
 	    ret = handle_filetype(fname, flags, &statbuf, &stated, &ft, callback, data);
-	    if (ret != CL_SUCCESS) {
+	    if (ret != CL_SUCCESS_T) {
 		free(fname);
 		break;
 	    }
@@ -718,7 +718,7 @@ static int cli_ftw_dir(const char *dirname, int flags, int maxdepth, cli_ftw_cb 
 		if (!statbufp) {
 		    ret = callback(stated ? &statbuf : NULL, NULL, fname, error_mem, data);
 		    free(fname);
-		    if (ret != CL_SUCCESS)
+		    if (ret != CL_SUCCESS_T)
 			break;
 		    else {
 			errno = 0;
@@ -756,14 +756,14 @@ static int cli_ftw_dir(const char *dirname, int flags, int maxdepth, cli_ftw_cb 
 	err = errno;
 #endif
 	closedir(dd);
-	ret = CL_SUCCESS;
+	ret = CL_SUCCESS_T;
 	if (err) {
 	    char errs[128];
 	    cli_errmsg("Unable to readdir() directory %s: %s\n", dirname,
 		       cli_strerror(errno, errs, sizeof(errs)));
 	    /* report error to callback using error_stat */
 	    ret = callback(NULL, NULL, dirname, error_stat, data);
-	    if (ret != CL_SUCCESS) {
+	    if (ret != CL_SUCCESS_T) {
 		if (entries) {
 		    for (i=0;i<entries_cnt;i++) {
 			struct dirent_data *entry = &entries[i];
@@ -785,7 +785,7 @@ static int cli_ftw_dir(const char *dirname, int flags, int maxdepth, cli_ftw_cb 
 		    free(entry->filename);
 		if (entry->statbuf)
 		    free(entry->statbuf);
-		if (ret != CL_SUCCESS)
+		if (ret != CL_SUCCESS_T)
 		    break;
 	    }
 	    for (i++;i<entries_cnt;i++) {
@@ -919,7 +919,7 @@ int cli_gentempfd(const char *dir, char **name, int *fd)
 	return CL_ECREAT;
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cli_regcomp(regex_t *preg, const char *pattern, int cflags)

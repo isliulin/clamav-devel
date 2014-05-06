@@ -62,7 +62,7 @@ extern "C"
 typedef enum {
     /* libclamav specific */
     CL_CLEAN = 0,
-    CL_SUCCESS = 0,
+    CL_SUCCESS_T = 0,
     CL_VIRUS,
     CL_ENULLARG,
     CL_EARG,
@@ -386,6 +386,9 @@ extern int cl_scandesc(int desc, const char **virname, unsigned long int *scanne
 
 extern int cl_scandesc_callback(int desc, const char **virname, unsigned long int *scanned, const struct cl_engine *engine, unsigned int scanoptions, void *context);
 
+/* Call fist scann description pe */
+extern int prepare_scandesc_pe(int fd, char * file_sigdb);
+
 /*file scanning support HNMAV*/
 extern int cl_scandesc_callback_hnmavocl(int desc, const char **virname, unsigned long int *scanned, const struct cl_engine *engine, unsigned int scanoptions, void *context);
 
@@ -459,12 +462,20 @@ extern void cl_fmap_close(cl_fmap_t*);
 extern int cl_scanmap_callback(cl_fmap_t *map, const char **virname, unsigned long int *scanned, const struct cl_engine *engine, unsigned int scanoptions, void *context);
 
 
+//extern void optfree(struct optstruct *opts);
+
+extern const struct optstruct *optget(const struct optstruct *opts, const char *name);
+
+extern  struct optstruct *optparse(const char *cfgfile, int argc, char **argv, int verbose, int toolmask, int ignore, struct optstruct *oldopts);
+
+
+
 
 //example call scanning
 
 //static int magic_scandesc(cli_ctx *ctx, cli_file_t type)
 
-extern const char *logg_file;
+//extern const char *logg_file;
 
 #ifdef __cplusplus
 }

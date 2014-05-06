@@ -120,7 +120,7 @@ static char *cab_readstr(fmap_t *map, off_t *offset, int *ret)
 	return NULL;
     }
 
-    *ret = CL_SUCCESS;
+    *ret = CL_SUCCESS_T;
     return retstr;
 }
 
@@ -382,7 +382,7 @@ int cab_open(fmap_t *map, off_t offset, struct cab_archive *cab)
 	file->length = EC32(file_hdr->cbFile);
 	file->attribs = EC16(file_hdr->attribs);
 	fidx = EC16(file_hdr->iFolder);
-	file->error = CL_SUCCESS;
+	file->error = CL_SUCCESS_T;
 
 	file->name = cab_readstr(map, &cur_offset, &ret);
 	if(ret) {
@@ -445,7 +445,7 @@ int cab_open(fmap_t *map, off_t offset, struct cab_archive *cab)
 
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static int cab_read_block(struct cab_file *file)
@@ -471,7 +471,7 @@ static int cab_read_block(struct cab_file *file)
     state->pt = state->end = state->block;
     state->end += state->blklen;
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static int cab_read(struct cab_file *file, unsigned char *buffer, int bytes)
@@ -557,7 +557,7 @@ static int cab_unstore(struct cab_file *file)
 	    break;
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 #define CAB_CHGFOLDER							\
@@ -677,7 +677,7 @@ int cab_extract(struct cab_file *file, const char *name)
     close(file->ofd);
 
     if(ret == CL_BREAK)
-	ret = CL_SUCCESS;
+	ret = CL_SUCCESS_T;
 
     return ret;
 }

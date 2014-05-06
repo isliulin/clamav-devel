@@ -222,14 +222,14 @@ static int cli_bytecode_context_reset(struct cli_bc_ctx *ctx)
     ctx->nmaps = 0;
 
     ctx->containertype = CL_TYPE_ANY;
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cli_bytecode_context_clear(struct cli_bc_ctx *ctx)
 {
     cli_bytecode_context_reset(ctx);
     memset(ctx, 0, sizeof(*ctx));
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static unsigned typesize(const struct cli_bc *bc, uint16_t type)
@@ -316,7 +316,7 @@ int cli_bytecode_context_setfuncid(struct cli_bc_ctx *ctx, const struct cli_bc *
 	cli_errmsg("bytecode: error allocating memory for parameters\n");
 	return CL_EMEM;
     }
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static inline int type_isint(uint16_t type)
@@ -348,7 +348,7 @@ int cli_bytecode_context_setparam_int(struct cli_bc_ctx *ctx, unsigned i, uint64
 	    *(uint64_t*)&ctx->values[ctx->operands[i]] = c;
 	    break;
     }
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cli_bytecode_context_setparam_ptr(struct cli_bc_ctx *ctx, unsigned i, void *data, unsigned datalen)
@@ -637,7 +637,7 @@ static int parseHeader(struct cli_bc *bc, unsigned char *buffer, unsigned *linel
 	cli_errmsg("Out of memory allocating %u types\n", bc->num_types);
 	return CL_EMEM;
     }
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static int parseLSig(struct cli_bc *bc, char *buffer)
@@ -655,7 +655,7 @@ static int parseLSig(struct cli_bc *bc, char *buffer)
 	bc->lsig = NULL; 
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static uint16_t readTypeID(struct cli_bc *bc, unsigned char *buffer,
@@ -801,7 +801,7 @@ static int parseTypes(struct cli_bc *bc, unsigned char *buffer)
 	    ty->align = typealign(bc, ty->containedTypes[0]);
 	}
     }
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 /* checks whether the type described by tid is the same as the one described by
@@ -909,7 +909,7 @@ static int parseApis(struct cli_bc *bc, unsigned char *buffer)
     }
     free(apity2ty); /* free temporary map */
     cli_dbgmsg("bytecode: Parsed %u APIcalls, maxapi %u\n", calls, maxapi);
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static uint16_t type_components(struct cli_bc *bc, uint16_t id, char *ok)
@@ -1018,7 +1018,7 @@ static int parseGlobals(struct cli_bc *bc, unsigned char *buffer)
 		   len-offset);
 	return CL_EMALFDB;
     }
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static int parseMD(struct cli_bc *bc, unsigned char *buffer)
@@ -1070,7 +1070,7 @@ static int parseMD(struct cli_bc *bc, unsigned char *buffer)
 	}
     }
     cli_dbgmsg("bytecode: Parsed %u nodes total\n", bc->dbgnode_cnt);
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static int parseFunctionHeader(struct cli_bc *bc, unsigned fn, unsigned char *buffer)
@@ -1151,7 +1151,7 @@ static int parseFunctionHeader(struct cli_bc *bc, unsigned fn, unsigned char *bu
 	cli_errmsg("Out of memory allocating basic blocks\n");
 	return CL_EMEM;
     }
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static bbid_t readBBID(struct cli_bc_func *func, const unsigned char *buffer, unsigned *off, unsigned len, char *ok) {
@@ -1407,7 +1407,7 @@ static int parseBB(struct cli_bc *bc, unsigned func, unsigned bb, unsigned char 
     }
     bcfunc->numBytes = 0;
     bcfunc->insn_idx += BB->numInsts;
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 enum parse_state {
@@ -1566,9 +1566,9 @@ int cli_bytecode_load(struct cli_bc *bc, FILE *f, struct cli_dbio *dbio, int tru
 	    linelength = 4096;
 	cli_dbgmsg("line: %d\n", linelength);
 	state = PARSE_SKIP;
-	rc = CL_SUCCESS;
+	rc = CL_SUCCESS_T;
     }
-    if (rc != CL_SUCCESS) {
+    if (rc != CL_SUCCESS_T) {
 	cli_errmsg("Error at bytecode line %u\n", row);
 	return rc;
     }
@@ -1585,12 +1585,12 @@ int cli_bytecode_load(struct cli_bc *bc, FILE *f, struct cli_dbio *dbio, int tru
 		rc = parseLSig(bc, buffer);
 #if 0
 DEAD CODE
-		if (rc == CL_BREAK) /* skip */ { //FIXME: parseLSig always returns CL_SUCCESS
+		if (rc == CL_BREAK) /* skip */ { //FIXME: parseLSig always returns CL_SUCCESS_T
 		    bc->state = bc_skip;
 		    state = PARSE_SKIP;
 		    continue;
 		}
-		if (rc != CL_SUCCESS) { //FIXME: parseLSig always returns CL_SUCCESS
+		if (rc != CL_SUCCESS_T) { //FIXME: parseLSig always returns CL_SUCCESS
 		    cli_errmsg("Error at bytecode line %u\n", row);
 		    free(buffer);
 		    return rc;
@@ -1600,7 +1600,7 @@ DEAD CODE
 		break;
 	    case PARSE_BC_TYPES:
 		rc = parseTypes(bc, (unsigned char*)buffer);
-		if (rc != CL_SUCCESS) {
+		if (rc != CL_SUCCESS_T) {
 		    cli_errmsg("Error at bytecode line %u\n", row);
 		    free(buffer);
 		    return rc;
@@ -1614,7 +1614,7 @@ DEAD CODE
 		    state = PARSE_SKIP;
 		    continue;
 		}
-		if (rc != CL_SUCCESS) {
+		if (rc != CL_SUCCESS_T) {
 		    cli_errmsg("Error at bytecode line %u\n", row);
 		    free(buffer);
 		    return rc;
@@ -1628,7 +1628,7 @@ DEAD CODE
 		    state = PARSE_SKIP;
 		    continue;
 		}
-		if (rc != CL_SUCCESS) {
+		if (rc != CL_SUCCESS_T) {
 		    cli_errmsg("Error at bytecode line %u\n", row);
 		    free(buffer);
 		    return rc;
@@ -1638,7 +1638,7 @@ DEAD CODE
 	    case PARSE_MD_OPT_HEADER:
 		if (buffer[0] == 'D') {
 		    rc = parseMD(bc, (unsigned char*)buffer);
-		    if (rc != CL_SUCCESS) {
+		    if (rc != CL_SUCCESS_T) {
 			cli_errmsg("Error at bytecode line %u\n", row);
 			free(buffer);
 			return rc;
@@ -1652,7 +1652,7 @@ DEAD CODE
 		    break;
 		}
 		rc = parseFunctionHeader(bc, current_func, (unsigned char*)buffer);
-		if (rc != CL_SUCCESS) {
+		if (rc != CL_SUCCESS_T) {
 		    cli_errmsg("Error at bytecode line %u\n", row);
 		    free(buffer);
 		    return rc;
@@ -1662,7 +1662,7 @@ DEAD CODE
 		break;
 	    case PARSE_BB:
 		rc = parseBB(bc, current_func, bb++, (unsigned char*)buffer);
-		if (rc != CL_SUCCESS) {
+		if (rc != CL_SUCCESS_T) {
 		    cli_errmsg("Error at bytecode line %u\n", row);
 		    free(buffer);
 		    return rc;
@@ -1699,7 +1699,7 @@ DEAD CODE
 		   current_func, bc->num_func);
 	return CL_EMALFDB;
     }
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static struct {
@@ -1738,7 +1738,7 @@ static int register_events(cli_events_t *ev)
 
 int cli_bytecode_run(const struct cli_all_bc *bcs, const struct cli_bc *bc, struct cli_bc_ctx *ctx)
 {
-    int ret = CL_SUCCESS;
+    int ret = CL_SUCCESS_T;
     struct cli_bc_inst inst;
     struct cli_bc_func func;
     cli_events_t *jit_ev = NULL, *interp_ev = NULL;
@@ -1760,7 +1760,7 @@ int cli_bytecode_run(const struct cli_all_bc *bcs, const struct cli_bc *bc, stru
     }
     if (bc->state == bc_disabled) {
 	cli_dbgmsg("bytecode triggered but running bytecodes is disabled\n");
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
     if (cctx)
         cli_event_time_start(cctx->perf, PERFT_BYTECODE);
@@ -2045,7 +2045,7 @@ static int cli_bytecode_prepare_interpreter(struct cli_bc *bc)
     unsigned i, j, k;
     uint64_t *gmap;
     unsigned bcglobalid = cli_apicall_maxglobal - _FIRST_GLOBAL+2;
-    int ret=CL_SUCCESS;
+    int ret=CL_SUCCESS_T;
     bc->numGlobalBytes = 0;
     gmap = cli_malloc(bc->num_globals*sizeof(*gmap));
     if (!gmap) {
@@ -2126,7 +2126,7 @@ static int cli_bytecode_prepare_interpreter(struct cli_bc *bc)
 	}
     }
 
-    for (i=0;i<bc->num_func && ret == CL_SUCCESS;i++) {
+    for (i=0;i<bc->num_func && ret == CL_SUCCESS_T;i++) {
 	struct cli_bc_func *bcfunc = &bc->funcs[i];
 	unsigned totValues = bcfunc->numValues + bcfunc->numConstants + bc->num_globals;
 	unsigned *map = cli_malloc(sizeof(*map)*totValues);
@@ -2153,7 +2153,7 @@ static int cli_bytecode_prepare_interpreter(struct cli_bc *bc)
 	    map[bcfunc->numValues+j] = bcfunc->numBytes;
 	    bcfunc->numBytes += 8;
 	}
-	for (j=0;j<bcfunc->numInsts && ret == CL_SUCCESS;j++) {
+	for (j=0;j<bcfunc->numInsts && ret == CL_SUCCESS_T;j++) {
 	    struct cli_bc_inst *inst = &bcfunc->allinsts[j];
 	    inst->dest = map[inst->dest];
 	    switch (inst->opcode) {
@@ -2224,7 +2224,7 @@ static int cli_bytecode_prepare_interpreter(struct cli_bc *bc)
 			    ret = CL_EBYTECODE;
 			}
 		    }
-		    if (ret != CL_SUCCESS)
+		    if (ret != CL_SUCCESS_T)
 			break;
 		    if (inst->u.ops.numOps > 0) {
 			inst->u.ops.opsizes = cli_malloc(sizeof(*inst->u.ops.opsizes)*inst->u.ops.numOps);
@@ -2255,7 +2255,7 @@ static int cli_bytecode_prepare_interpreter(struct cli_bc *bc)
                       cli_errmsg("bytecode: gep1 of alloca is not allowed\n");
                       ret = CL_EBYTECODE;
                     }
-            if (ret != CL_SUCCESS)
+            if (ret != CL_SUCCESS_T)
                 break;
 		    MAP(inst->u.three[1]);
 		    MAP(inst->u.three[2]);
@@ -2273,7 +2273,7 @@ static int cli_bytecode_prepare_interpreter(struct cli_bc *bc)
 		    MAP(inst->u.three[1]);
 		    if (calc_gepz(bc, bcfunc, inst->u.three[0], inst->u.three[2]) == -1)
 			ret = CL_EBYTECODE;
-            if (ret == CL_SUCCESS)
+            if (ret == CL_SUCCESS_T)
 		        MAP(inst->u.three[2]);
 		    break;
 /*		case OP_BC_GEPN:
@@ -2436,7 +2436,7 @@ static int run_selfcheck(struct cli_all_bc *bcs)
     ctx->bytecode_timeout = 0;
     rc = cli_bytecode_run(bcs, bc, ctx);
     cli_bytecode_context_destroy(ctx);
-    if (rc != CL_SUCCESS) {
+    if (rc != CL_SUCCESS_T) {
 	cli_errmsg("bytecode self test failed: %s\n",
 		   cl_strerror(rc));
     } else {
@@ -2455,7 +2455,7 @@ static int selfcheck(int jit, struct cli_bcengine *engine)
     bcs.count = 0;
     bcs.engine = engine;
     rc = add_selfcheck(&bcs);
-    if (rc == CL_SUCCESS) {
+    if (rc == CL_SUCCESS_T) {
 	if (jit) {
 	    if (!bcs.engine) {
 		cli_dbgmsg("bytecode: JIT disabled\n");
@@ -2466,15 +2466,15 @@ static int selfcheck(int jit, struct cli_bcengine *engine)
 	} else {
 	    rc = cli_bytecode_prepare_interpreter(bcs.all_bcs);
 	}
-	if (rc == CL_SUCCESS)
+	if (rc == CL_SUCCESS_T)
 	    rc = run_selfcheck(&bcs);
 	if (rc == CL_BREAK)
-	    rc = CL_SUCCESS;
+	    rc = CL_SUCCESS_T;
     }
     cli_bytecode_destroy(bcs.all_bcs);
     free(bcs.all_bcs);
     cli_bytecode_done_jit(&bcs, 1);
-    if (rc != CL_SUCCESS) {
+    if (rc != CL_SUCCESS_T) {
 	cli_errmsg("Bytecode: failed to run selfcheck in %s mode: %s\n",
 		   jit ? "JIT" : "interpreter", cl_strerror(rc));
     }
@@ -2583,7 +2583,7 @@ int cli_bytecode_prepare2(struct cl_engine *engine, struct cli_all_bc *bcs, unsi
 
     if (!bcs->count) {
 	cli_dbgmsg("No bytecodes loaded, not running builtin test\n");
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     engine->bytecode_mode = CL_BYTECODE_MODE_AUTO;
@@ -2626,7 +2626,7 @@ int cli_bytecode_prepare2(struct cl_engine *engine, struct cli_all_bc *bcs, unsi
 	return CL_EMEM;
     }
     rc = run_builtin_or_loaded(bcs, BC_STARTUP, builtin_bc_startup, ctx, "BC_STARTUP");
-    if (rc != CL_SUCCESS) {
+    if (rc != CL_SUCCESS_T) {
 	cli_warnmsg("Bytecode: BC_STARTUP failed to run, disabling ALL bytecodes! Please report to http://bugs.clamav.net\n");
 	ctx->bytecode_disable_status = 2;
     } else {
@@ -2660,11 +2660,11 @@ int cli_bytecode_prepare2(struct cl_engine *engine, struct cli_all_bc *bcs, unsi
 	engine->bytecode_mode != CL_BYTECODE_MODE_OFF) {
 	selfcheck(1, bcs->engine);
 	rc = cli_bytecode_prepare_jit(bcs);
-	if (rc == CL_SUCCESS) {
+	if (rc == CL_SUCCESS_T) {
 	    jitok = 1;
 	    cli_dbgmsg("Bytecode: %u bytecode prepared with JIT\n", bcs->count);
 	    if (engine->bytecode_mode != CL_BYTECODE_MODE_TEST)
-		return CL_SUCCESS;
+		return CL_SUCCESS_T;
 	}
 	if (engine->bytecode_mode == CL_BYTECODE_MODE_JIT) {
 	    cli_errmsg("Bytecode: JIT required, but not all bytecodes could be prepared with JIT\n");
@@ -2688,7 +2688,7 @@ int cli_bytecode_prepare2(struct cl_engine *engine, struct cli_all_bc *bcs, unsi
 	for (i=0;i<bcs->count;i++)
 	    bcs->all_bcs[i].state = bc_disabled;
 	cli_dbgmsg("Bytecode: ALL bytecodes disabled\n");
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     for (i=0;i<bcs->count;i++) {
@@ -2703,7 +2703,7 @@ int cli_bytecode_prepare2(struct cl_engine *engine, struct cli_all_bc *bcs, unsi
 	    continue;
 	}
 	rc = cli_bytecode_prepare_interpreter(bc);
-	if (rc != CL_SUCCESS) {
+	if (rc != CL_SUCCESS_T) {
 	    bc->state = bc_disabled;
 	    cli_warnmsg("Bytecode: %d failed to prepare for interpreter mode\n", bc->id);
 	    return rc;
@@ -2712,7 +2712,7 @@ int cli_bytecode_prepare2(struct cl_engine *engine, struct cli_all_bc *bcs, unsi
     }
     cli_dbgmsg("Bytecode: %u bytecode prepared with JIT, "
 	       "%u prepared with interpreter, %u total\n", jitcount, interp, bcs->count);
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cli_bytecode_init(struct cli_all_bc *allbc)
@@ -2775,15 +2775,15 @@ int cli_bytecode_runlsig(cli_ctx *cctx, struct cli_target_info *tinfo,
 	memcpy(&ctx.lsigcnt, lsigcnt, 64*4);
 	memcpy(&ctx.lsigoff, lsigsuboff, 64*4);
 	cli_bytecode_context_clear(&ctx);
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     cli_dbgmsg("Running bytecode for logical signature match\n");
     ret = cli_bytecode_run(bcs, bc, &ctx);
-    if (ret != CL_SUCCESS) {
+    if (ret != CL_SUCCESS_T) {
 	cli_warnmsg("Bytcode %u failed to run: %s\n", bc->id, cl_strerror(ret));
 	cli_bytecode_context_clear(&ctx);
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
     if (ctx.virname) {
 	int rc;
@@ -2799,7 +2799,7 @@ int cli_bytecode_runlsig(cli_ctx *cctx, struct cli_target_info *tinfo,
     ret = cli_bytecode_context_getresult_int(&ctx);
     cli_dbgmsg("Bytecode %u returned code: %u\n", bc->id, ret);
     cli_bytecode_context_clear(&ctx);
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cli_bytecode_runhook(cli_ctx *cctx, const struct cl_engine *engine, struct cli_bc_ctx *ctx,
@@ -2829,7 +2829,7 @@ int cli_bytecode_runhook(cli_ctx *cctx, const struct cl_engine *engine, struct c
 	cli_bytecode_context_setfuncid(ctx, bc, 0);
 	ret = cli_bytecode_run(&engine->bcs, bc, ctx);
 	executed++;
-	if (ret != CL_SUCCESS) {
+	if (ret != CL_SUCCESS_T) {
 	    cli_warnmsg("Bytecode %u failed to run: %s\n", bc->id, cl_strerror(ret));
 	    errorflag = 1;
 	    continue;

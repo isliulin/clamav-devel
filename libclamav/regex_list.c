@@ -143,7 +143,7 @@ static int validate_subdomain(const struct regex_list *regex, const struct pre_f
  * @hostOnly - if you want to match only the host part
  * @is_whitelist - is this a lookup in whitelist?
  *
- * @return - CL_SUCCESS - url doesn't match
+ * @return - CL_SUCCESS_T - url doesn't match
  *         - CL_VIRUS - url matches list
  *
  * Do not send NULL pointers to this function!!
@@ -286,7 +286,7 @@ int init_regex_list(struct regex_matcher* matcher, uint8_t dconf_prefiltering)
 		return rc;
 	}
 	filter_init(&matcher->filter);
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 static int functionality_level_check(char* line)
@@ -297,22 +297,22 @@ static int functionality_level_check(char* line)
 
 	ptmin = strrchr(line,':');
 	if(!ptmin) 
-		return CL_SUCCESS;
+		return CL_SUCCESS_T;
 	
 	ptmin++;
 
 	ptmax = strchr(ptmin,'-');
 	if(!ptmax) 
-		return CL_SUCCESS;/* there is no functionality level specified, so we're ok */
+		return CL_SUCCESS_T;/* there is no functionality level specified, so we're ok */
 	else {
 		size_t min, max;
 		ptmax++;
 		for(j=0;j+ptmin+1 < ptmax;j++)
 			if(!isdigit(ptmin[j])) 
-				return CL_SUCCESS;/* not numbers, not functionality level */
+				return CL_SUCCESS_T;/* not numbers, not functionality level */
 		for(j=0;j<strlen(ptmax);j++)
 			if(!isdigit(ptmax[j])) 
-				return CL_SUCCESS;/* see above */
+				return CL_SUCCESS_T;/* see above */
 		ptmax[-1]='\0';
 		min = atoi(ptmin);
 		if(strlen(ptmax)==0)
@@ -328,7 +328,7 @@ static int functionality_level_check(char* line)
 		if(max < cl_retflevel()) 
 			return CL_EMALFDB;
 		ptmin[-1]='\0';
-		return CL_SUCCESS;
+		return CL_SUCCESS_T;
 	}
 }
 
@@ -365,7 +365,7 @@ static int add_hash(struct regex_matcher *matcher, char* pattern, const char fl,
 		cli_dbgmsg("Skipping hash %s\n", pattern);
 		mpool_free(matcher->mempool, pat->pattern);
 		mpool_free(matcher->mempool, pat);
-		return CL_SUCCESS;
+		return CL_SUCCESS_T;
 	    }
 	}
 	pat->virname = mpool_malloc(matcher->mempool, 1);
@@ -383,7 +383,7 @@ static int add_hash(struct regex_matcher *matcher, char* pattern, const char fl,
 		free(pat);
 		return CL_EMALFDB;
 	}
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 
@@ -502,7 +502,7 @@ int load_regex_matcher(struct cl_engine *engine,struct regex_matcher* matcher,FI
 	if(signo)
 	    *signo += entry;
 
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 
@@ -511,7 +511,7 @@ int cli_build_regex_list(struct regex_matcher* matcher)
 {
 	int rc;
 	if(!matcher)
-		return CL_SUCCESS;
+		return CL_SUCCESS_T;
 	if(!matcher->list_inited || !matcher->list_loaded) {
 		cli_errmsg("Regex list not loaded!\n");
 		return -1;/*TODO: better error code */
@@ -523,7 +523,7 @@ int cli_build_regex_list(struct regex_matcher* matcher)
 	matcher->list_built=1;
 	cli_hashset_destroy(&matcher->sha256_pfx_set);
 
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 /* Done with this matcher, free resources */
@@ -609,7 +609,7 @@ static int add_newsuffix(struct regex_matcher *matcher, struct regex_list *info,
 		return ret;
 	}
 	filter_add_static(&matcher->filter, (const unsigned char*)suffix, len, "regex");
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 #define MODULE "regex_list: "

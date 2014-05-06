@@ -45,11 +45,11 @@
      ctx - cli_ctx context pointer
      fd  - fd to close
      tmpname - name of file to unlink, address of storage to free
-   returns - CL_SUCCESS or CL_EUNLINK
+   returns - CL_SUCCESS_T or CL_EUNLINK
  */
 static int xar_cleanup_temp_file(cli_ctx *ctx, int fd, char * tmpname)
 {
-    int rc = CL_SUCCESS;
+    int rc = CL_SUCCESS_T;
     close(fd);
     if(!ctx->engine->keeptmp) {
         if (cli_unlink(tmpname)) {
@@ -66,7 +66,7 @@ static int xar_cleanup_temp_file(cli_ctx *ctx, int fd, char * tmpname)
    parameters:
      reader - xmlTextReaderPtr
      value - pointer to long to contain the returned value
-   returns - CL_SUCCESS or CL_EFORMAT
+   returns - CL_SUCCESS_T or CL_EFORMAT
  */
 static int xar_get_numeric_from_xml_element(xmlTextReaderPtr reader, long * value)
 {
@@ -79,7 +79,7 @@ static int xar_get_numeric_from_xml_element(xmlTextReaderPtr reader, long * valu
                 cli_errmsg("cli_scanxar: XML element value %li\n", *value);
                 return CL_EFORMAT;
             }
-            return CL_SUCCESS;
+            return CL_SUCCESS_T;
         }
     }
     cli_errmsg("cli_scanxar: No text for XML element\n");
@@ -142,7 +142,7 @@ static void xar_get_checksum_values(xmlTextReaderPtr reader, unsigned char ** ck
      a_hash - pointer to int for returning archived checksum algorithm.
      e_cksum - pointer to char* for return extracted checksum value.
      e_hash - pointer to int for returning extracted checksum algorithm.
-   returns - CL_FORMAT, CL_SUCCESS, CL_BREAK. CL_BREAK indicates no more <data>/<ea> element.
+   returns - CL_FORMAT, CL_SUCCESS_T, CL_BREAK. CL_BREAK indicates no more <data>/<ea> element.
  */
 static int xar_get_toc_data_values(xmlTextReaderPtr reader, long *length, long *offset, long *size, int *encoding,
                                    unsigned char ** a_cksum, int * a_hash, unsigned char ** e_cksum, int * e_hash)
@@ -164,17 +164,17 @@ static int xar_get_toc_data_values(xmlTextReaderPtr reader, long *length, long *
             /*  cli_dbgmsg("cli_scanxar: xmlTextReaderRead read %s\n", name); */
             if (xmlStrEqual(name, (const xmlChar *)"offset") && 
                 xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT) {
-                if (CL_SUCCESS == xar_get_numeric_from_xml_element(reader, offset))
+                if (CL_SUCCESS_T == xar_get_numeric_from_xml_element(reader, offset))
                     gotoffset=1;
 
             } else if (xmlStrEqual(name, (const xmlChar *)"length") &&
                        xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT) {
-                if (CL_SUCCESS == xar_get_numeric_from_xml_element(reader, length))
+                if (CL_SUCCESS_T == xar_get_numeric_from_xml_element(reader, length))
                     gotlength=1;
 
             } else if (xmlStrEqual(name, (const xmlChar *)"size") &&
                        xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT) {
-                if (CL_SUCCESS == xar_get_numeric_from_xml_element(reader, size))
+                if (CL_SUCCESS_T == xar_get_numeric_from_xml_element(reader, size))
                     gotsize=1;
 
             } else if (xmlStrEqual(name, (const xmlChar *)"archived-checksum") &&
@@ -242,7 +242,7 @@ static int xar_get_toc_data_values(xmlTextReaderPtr reader, long *length, long *
     }
     
     if (gotoffset && gotlength && gotsize) {
-        rc = CL_SUCCESS;
+        rc = CL_SUCCESS_T;
     }
     else if (0 == gotoffset + gotlength + gotsize)
         rc = CL_BREAK;
@@ -259,12 +259,12 @@ static int xar_get_toc_data_values(xmlTextReaderPtr reader, long *length, long *
      reader - xmlTextReaderPtr
      ctx - pointer to cli_ctx
   Returns:
-     CL_SUCCESS - subdoc found and clean scan (or virus found and SCAN_ALL), or no subdocument
+     CL_SUCCESS_T - subdoc found and clean scan (or virus found and SCAN_ALL), or no subdocument
      other - error return code from cli_mem_scandesc()
 */                        
 static int xar_scan_subdocuments(xmlTextReaderPtr reader, cli_ctx *ctx)
 {
-    int rc = CL_SUCCESS, subdoc_len, fd;
+    int rc = CL_SUCCESS_T, subdoc_len, fd;
     xmlChar * subdoc;
     const xmlChar *name;
     char * tmpname;
@@ -278,7 +278,7 @@ static int xar_scan_subdocuments(xmlTextReaderPtr reader, cli_ctx *ctx)
         }
         if (xmlStrEqual(name, (const xmlChar *)"toc") && 
             xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT)
-            return CL_SUCCESS;
+            return CL_SUCCESS_T;
         if (xmlStrEqual(name, (const xmlChar *)"subdoc") && 
             xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT) {
             subdoc = xmlTextReaderReadInnerXml(reader);
@@ -292,11 +292,11 @@ static int xar_scan_subdocuments(xmlTextReaderPtr reader, cli_ctx *ctx)
             cli_dbgmsg("cli_scanxar: in-memory scan of xml subdocument, len %i.\n", subdoc_len);
             rc = cli_mem_scandesc(subdoc, subdoc_len, ctx);
             if (rc == CL_VIRUS && SCAN_ALL)
-                rc = CL_SUCCESS;
+                rc = CL_SUCCESS_T;
             
             /* make a file to leave if --leave-temps in effect */
             if(ctx->engine->keeptmp) {
-                if ((rc = cli_gentempfd(ctx->engine->tmpdir, &tmpname, &fd)) != CL_SUCCESS) {
+                if ((rc = cli_gentempfd(ctx->engine->tmpdir, &tmpname, &fd)) != CL_SUCCESS_T) {
                     cli_errmsg("cli_scanxar: Can't create temporary file for subdocument.\n");
                 } else {
                     cli_dbgmsg("cli_scanxar: Writing subdoc to temp file %s.\n", tmpname);
@@ -309,7 +309,7 @@ static int xar_scan_subdocuments(xmlTextReaderPtr reader, cli_ctx *ctx)
             }
 
             xmlFree(subdoc);
-            if (rc != CL_SUCCESS)
+            if (rc != CL_SUCCESS_T)
                 return rc;
             xmlTextReaderNext(reader);
         }        
@@ -402,12 +402,12 @@ static int xar_hash_check(int hash, const void * result, const void * expected)
   cli_scanxar - scan an xar archive.
   Parameters:
     ctx - pointer to cli_ctx.
-  returns - CL_SUCCESS or CL_ error code.
+  returns - CL_SUCCESS_T or CL_ error code.
 */
 
 int cli_scanxar(cli_ctx *ctx)
 {
-    int rc = CL_SUCCESS;
+    int rc = CL_SUCCESS_T;
     unsigned int cksum_fails = 0;
 #if HAVE_LIBXML2
     int fd = -1;
@@ -490,14 +490,14 @@ int cli_scanxar(cli_ctx *ctx)
     /* scan the xml */
     cli_dbgmsg("cli_scanxar: scanning xar TOC xml in memory.\n"); 
     rc = cli_mem_scandesc(toc, hdr.toc_length_decompressed, ctx);
-    if (rc != CL_SUCCESS) {
+    if (rc != CL_SUCCESS_T) {
         if (rc != CL_VIRUS || !SCAN_ALL)
             goto exit_toc;        
     }
 
     /* make a file to leave if --leave-temps in effect */
     if(ctx->engine->keeptmp) {
-        if ((rc = cli_gentempfd(ctx->engine->tmpdir, &tmpname, &fd)) != CL_SUCCESS) {
+        if ((rc = cli_gentempfd(ctx->engine->tmpdir, &tmpname, &fd)) != CL_SUCCESS_T) {
             cli_errmsg("cli_scanxar: Can't create temporary file for TOC.\n");
             goto exit_toc;
         }
@@ -508,7 +508,7 @@ int cli_scanxar(cli_ctx *ctx)
             goto exit_toc;
         }
         rc = xar_cleanup_temp_file(ctx, fd, tmpname);
-        if (rc != CL_SUCCESS)
+        if (rc != CL_SUCCESS_T)
             goto exit_toc;
     }
 
@@ -519,7 +519,7 @@ int cli_scanxar(cli_ctx *ctx)
     }
 
     rc = xar_scan_subdocuments(reader, ctx);
-    if (rc != CL_SUCCESS) {
+    if (rc != CL_SUCCESS_T) {
         cli_errmsg("xar_scan_subdocuments returns %i.\n", rc);
         goto exit_reader;
     }
@@ -527,7 +527,7 @@ int cli_scanxar(cli_ctx *ctx)
     /* Walk the TOC XML and extract files */
     fd = -1;
     tmpname = NULL;
-    while (CL_SUCCESS == (rc = xar_get_toc_data_values(reader, &length, &offset, &size, &encoding,
+    while (CL_SUCCESS_T == (rc = xar_get_toc_data_values(reader, &length, &offset, &size, &encoding,
                                                        &a_cksum, &a_hash, &e_cksum, &e_hash))) {
         int do_extract_cksum = 1;
         unsigned char * blockp;
@@ -540,13 +540,13 @@ int cli_scanxar(cli_ctx *ctx)
         /* clean up temp file from previous loop iteration */
         if (fd > -1 && tmpname) {
             rc = xar_cleanup_temp_file(ctx, fd, tmpname);
-            if (rc != CL_SUCCESS)
+            if (rc != CL_SUCCESS_T)
                 goto exit_reader;
         }
 
         at = offset + hdr.toc_length_compressed + hdr.size;
 
-        if ((rc = cli_gentempfd(ctx->engine->tmpdir, &tmpname, &fd)) != CL_SUCCESS) {
+        if ((rc = cli_gentempfd(ctx->engine->tmpdir, &tmpname, &fd)) != CL_SUCCESS_T) {
             cli_errmsg("cli_scanxar: Can't generate temporary file.\n");
             goto exit_reader;
         }
@@ -801,7 +801,7 @@ int cli_scanxar(cli_ctx *ctx)
         }
         
         rc = cli_magic_scandesc(fd, ctx);
-        if (rc != CL_SUCCESS) {
+        if (rc != CL_SUCCESS_T) {
             if (rc == CL_VIRUS) {
                 cli_dbgmsg("cli_scanxar: Infected with %s\n", cli_get_last_virus(ctx));
                 if (!SCAN_ALL)
@@ -827,7 +827,7 @@ int cli_scanxar(cli_ctx *ctx)
  exit_toc:
     free(toc);
     if (rc == CL_BREAK)
-        rc = CL_SUCCESS;
+        rc = CL_SUCCESS_T;
 #else
     cli_dbgmsg("cli_scanxar: can't scan xar files, need libxml2.\n");
 #endif

@@ -127,7 +127,7 @@ static int scancws(cli_ctx *ctx, struct swf_file_hdr *hdr)
 	char *tmpname;
 	int fd;
 
-    if((ret = cli_gentempfd(ctx->engine->tmpdir, &tmpname, &fd)) != CL_SUCCESS) {
+    if((ret = cli_gentempfd(ctx->engine->tmpdir, &tmpname, &fd)) != CL_SUCCESS_T) {
 	cli_errmsg("scancws: Can't generate temporary file\n");
 	return ret;
     }
@@ -186,7 +186,7 @@ static int scancws(cli_ctx *ctx, struct swf_file_hdr *hdr)
 	zret = inflate(&stream, Z_SYNC_FLUSH);
 	count = FILEBUFF - stream.avail_out;
 	if(count) {
-	    if(cli_checklimits("SWF", ctx, outsize + count, 0, 0) != CL_SUCCESS)
+	    if(cli_checklimits("SWF", ctx, outsize + count, 0, 0) != CL_SUCCESS_T)
 		break;
 	    if(cli_writen(fd, outbuff, count) != count) {
 		cli_errmsg("scancws: Can't write to file %s\n", tmpname);

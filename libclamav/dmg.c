@@ -172,7 +172,7 @@ int cli_scandmg(cli_ctx *ctx)
         int xret;
         xret = dmg_extract_xml(ctx, dirname, &hdr);
 
-        if (xret != CL_SUCCESS) {
+        if (xret != CL_SUCCESS_T) {
             /* Printed err detail inside dmg_extract_xml */
             free(dirname);
             return xret;
@@ -1160,6 +1160,6 @@ static int dmg_extract_xml(cli_ctx *ctx, char *dir, struct dmg_koly_block *hdr)
 
     close(ofd);
     free(xmlfile);
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 

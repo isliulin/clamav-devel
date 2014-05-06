@@ -1724,33 +1724,12 @@ AC_OUTPUT([
 clamscan/Makefile
 database/Makefile
 docs/Makefile
-clamd/Makefile
-clamdscan/Makefile
-clamav-milter/Makefile
-freshclam/Makefile
-sigtool/Makefile
-clamconf/Makefile
-etc/Makefile
 test/Makefile
 unit_tests/Makefile
-clamdtop/Makefile
-clambc/Makefile
 Makefile
 clamav-config
 libclamav.pc
 platform.h
-docs/man/clamav-milter.8
-docs/man/clamav-milter.conf.5
-docs/man/clambc.1
-docs/man/clamconf.1
-docs/man/clamd.8
-docs/man/clamd.conf.5
-docs/man/clamdscan.1
-docs/man/clamscan.1
-docs/man/freshclam.1
-docs/man/freshclam.conf.5
-docs/man/sigtool.1
-docs/man/clamdtop.1
 ])
 
 if test "$enable_llvm" = "yes" && test "$subdirfailed" != "no"; then

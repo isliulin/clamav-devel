@@ -189,7 +189,7 @@ static int fill_buf(arj_decode_t *decode_data, int n)
 		decode_data->bit_count = CHAR_BIT;
 	}
 	decode_data->bit_buf |= decode_data->sub_bit_buf >> (decode_data->bit_count -= n);
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 static int init_getbits(arj_decode_t *decode_data)
@@ -223,7 +223,7 @@ static int write_text(int ofd, unsigned char *data, int length)
 	if (count != length) {
 		return CL_EWRITE;
 	} else {
-		return CL_SUCCESS;
+		return CL_SUCCESS_T;
 	}
 }
 
@@ -333,7 +333,7 @@ static int make_table(arj_decode_t *decode_data, int nchar, unsigned char *bitle
 		}
 		start[len] = nextcode;
 	}
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 static int read_pt_len(arj_decode_t *decode_data, int nn, int nbit, int i_special)
@@ -368,13 +368,13 @@ static int read_pt_len(arj_decode_t *decode_data, int nn, int nbit, int i_specia
 				}
 			}
 			fill_buf(decode_data, (c < 7) ? 3 : (int)(c - 3));
-			if (decode_data->status != CL_SUCCESS) {
+			if (decode_data->status != CL_SUCCESS_T) {
 				return decode_data->status;
 			}
 			decode_data->pt_len[i++] = (unsigned char) c;
 			if (i == i_special) {
 				c = arj_getbits(decode_data, 2);
-				if (decode_data->status != CL_SUCCESS) {
+				if (decode_data->status != CL_SUCCESS_T) {
 					return decode_data->status;
 				}
 				while ((--c >= 0) && (i < NPT)) {
@@ -385,11 +385,11 @@ static int read_pt_len(arj_decode_t *decode_data, int nn, int nbit, int i_specia
 		while ((i < nn) && (i < NPT)) {
 			decode_data->pt_len[i++] = 0;
 		}
-		if (make_table(decode_data, nn, decode_data->pt_len, 8, decode_data->pt_table, PTABLESIZE) != CL_SUCCESS) {
+		if (make_table(decode_data, nn, decode_data->pt_len, 8, decode_data->pt_table, PTABLESIZE) != CL_SUCCESS_T) {
 			return CL_EUNPACK;
 		}
 	}
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 static int read_c_len(arj_decode_t *decode_data)
@@ -398,12 +398,12 @@ static int read_c_len(arj_decode_t *decode_data)
 	unsigned short mask;
 	
 	n = arj_getbits(decode_data, CBIT);
-	if (decode_data->status != CL_SUCCESS) {
+	if (decode_data->status != CL_SUCCESS_T) {
 		return decode_data->status;
 	}
 	if (n == 0) {
 		c = arj_getbits(decode_data, CBIT);
-		if (decode_data->status != CL_SUCCESS) {
+		if (decode_data->status != CL_SUCCESS_T) {
 			return decode_data->status;
 		}
 		for (i = 0; i < NC; i++) {
@@ -438,7 +438,7 @@ static int read_c_len(arj_decode_t *decode_data)
 				return CL_EUNPACK;
 			}
 			fill_buf(decode_data, (int)(decode_data->pt_len[c]));
-			if (decode_data->status != CL_SUCCESS) {
+			if (decode_data->status != CL_SUCCESS_T) {
 				return decode_data->status;
 			}	
 			if (c <= 2) {
@@ -449,7 +449,7 @@ static int read_c_len(arj_decode_t *decode_data)
 				} else {
 					c = arj_getbits(decode_data, CBIT) + 20;
 				}
-				if (decode_data->status != CL_SUCCESS) {
+				if (decode_data->status != CL_SUCCESS_T) {
 					return decode_data->status;
 				}		
 				while (--c >= 0) {
@@ -472,11 +472,11 @@ static int read_c_len(arj_decode_t *decode_data)
 		while (i < NC) {
 			decode_data->c_len[i++] = 0;
 		}
-		if (make_table(decode_data, NC, decode_data->c_len, 12, decode_data->c_table, CTABLESIZE) != CL_SUCCESS) {
+		if (make_table(decode_data, NC, decode_data->c_len, 12, decode_data->c_table, CTABLESIZE) != CL_SUCCESS_T) {
 			return CL_EUNPACK;
 		}
 	}
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 
@@ -558,12 +558,12 @@ static int decode(arj_metadata_t *metadata)
 	decode_data.offset = metadata->offset;
 	decode_data.comp_size = metadata->comp_size;
 	ret = decode_start(&decode_data);
-	if (ret != CL_SUCCESS) {
+	if (ret != CL_SUCCESS_T) {
 		free(decode_data.text);
 		metadata->offset = decode_data.offset;
 		return ret;
 	}
-	decode_data.status = CL_SUCCESS;
+	decode_data.status = CL_SUCCESS_T;
 
 	while (count < metadata->orig_size) {
 		if ((chr = decode_c(&decode_data)) <= UCHAR_MAX) {
@@ -571,7 +571,7 @@ static int decode(arj_metadata_t *metadata)
 			count++;
 			if (++out_ptr >= DDICSIZ) {
 				out_ptr = 0;
-				if (write_text(metadata->ofd, decode_data.text, DDICSIZ) != CL_SUCCESS) {
+				if (write_text(metadata->ofd, decode_data.text, DDICSIZ) != CL_SUCCESS_T) {
 					free(decode_data.text);
 					metadata->offset = decode_data.offset;
 					return CL_EWRITE;
@@ -597,7 +597,7 @@ static int decode(arj_metadata_t *metadata)
 					decode_data.text[out_ptr] = decode_data.text[i];
 					if (++out_ptr >= DDICSIZ) {
 						out_ptr = 0;
-						if (write_text(metadata->ofd, decode_data.text, DDICSIZ) != CL_SUCCESS) {
+						if (write_text(metadata->ofd, decode_data.text, DDICSIZ) != CL_SUCCESS_T) {
 							free(decode_data.text);
 							metadata->offset = decode_data.offset;
 							return CL_EWRITE;
@@ -609,7 +609,7 @@ static int decode(arj_metadata_t *metadata)
 				}
 			}
 		}
-		if (decode_data.status != CL_SUCCESS) {
+		if (decode_data.status != CL_SUCCESS_T) {
 			free(decode_data.text);
 			metadata->offset = decode_data.offset;
 			return decode_data.status;
@@ -621,7 +621,7 @@ static int decode(arj_metadata_t *metadata)
 
 	free(decode_data.text);
 	metadata->offset = decode_data.offset;
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 #define ARJ_BFIL(dd) {dd->getbuf|=dd->bit_buf>>dd->getlen;fill_buf(dd,CODE_BIT-dd->getlen);dd->getlen=CODE_BIT;}
@@ -689,23 +689,23 @@ static int decode_f(arj_metadata_t *metadata)
 	decode_data.offset = metadata->offset;
 	decode_data.comp_size = metadata->comp_size;
 	ret = init_getbits(&decode_data);
-	if (ret != CL_SUCCESS) {
+	if (ret != CL_SUCCESS_T) {
 	        metadata->offset = decode_data.offset;
 		return ret;
 	}
 	decode_data.getlen = decode_data.getbuf = 0;
-	decode_data.status = CL_SUCCESS;
+	decode_data.status = CL_SUCCESS_T;
 
 	while (count < metadata->orig_size) {
 		chr = decode_len(&decode_data);
-		if (decode_data.status != CL_SUCCESS) {
+		if (decode_data.status != CL_SUCCESS_T) {
 			free(decode_data.text);
 			metadata->offset = decode_data.offset;
 			return decode_data.status;
 		}
 		if (chr == 0) {
 			ARJ_GETBITS(dd, chr, CHAR_BIT);
-			if (decode_data.status != CL_SUCCESS) {
+			if (decode_data.status != CL_SUCCESS_T) {
 				free(decode_data.text);
 				metadata->offset = decode_data.offset;
 				return decode_data.status;
@@ -714,7 +714,7 @@ static int decode_f(arj_metadata_t *metadata)
 			count++;
 			if (++out_ptr >= DDICSIZ) {
 				out_ptr = 0;
-				if (write_text(metadata->ofd, decode_data.text, DDICSIZ) != CL_SUCCESS) {
+				if (write_text(metadata->ofd, decode_data.text, DDICSIZ) != CL_SUCCESS_T) {
 					free(decode_data.text);
 					metadata->offset = decode_data.offset;
 					return CL_EWRITE;
@@ -724,7 +724,7 @@ static int decode_f(arj_metadata_t *metadata)
 			j = chr - 1 + THRESHOLD;
 			count += j;
 			pos = decode_ptr(&decode_data);
-			if (decode_data.status != CL_SUCCESS) {
+			if (decode_data.status != CL_SUCCESS_T) {
 				free(decode_data.text);
 				metadata->offset = decode_data.offset;
 				return decode_data.status;
@@ -740,7 +740,7 @@ static int decode_f(arj_metadata_t *metadata)
 				decode_data.text[out_ptr] = decode_data.text[i];
 				if (++out_ptr >= DDICSIZ) {
 					out_ptr = 0;
-					if (write_text(metadata->ofd, decode_data.text, DDICSIZ) != CL_SUCCESS) {
+					if (write_text(metadata->ofd, decode_data.text, DDICSIZ) != CL_SUCCESS_T) {
 						free(decode_data.text);
 						metadata->offset = decode_data.offset;
 						return CL_EWRITE;
@@ -758,7 +758,7 @@ static int decode_f(arj_metadata_t *metadata)
 
 	free(decode_data.text);
 	metadata->offset = decode_data.offset;
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 static int arj_unstore(arj_metadata_t *metadata, int ofd, uint32_t len)
@@ -785,7 +785,7 @@ static int arj_unstore(arj_metadata_t *metadata, int ofd, uint32_t len)
 		}
 		rem -= count;
 	}
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 static int is_arj_archive(arj_metadata_t *metadata)
@@ -979,7 +979,7 @@ static int arj_read_file_header(arj_metadata_t *metadata)
 		return CL_EMEM;
 	}
 
-        return CL_SUCCESS;
+        return CL_SUCCESS_T;
 }
 
 int cli_unarj_open(fmap_t *map, const char *dirname, arj_metadata_t *metadata, size_t off)
@@ -995,7 +995,7 @@ int cli_unarj_open(fmap_t *map, const char *dirname, arj_metadata_t *metadata, s
 		cli_dbgmsg("Failed to read main header\n");
 		return CL_EFORMAT;
 	}
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 int cli_unarj_prepare_file(const char *dirname, arj_metadata_t *metadata)
@@ -1015,7 +1015,7 @@ int cli_unarj_prepare_file(const char *dirname, arj_metadata_t *metadata)
 int cli_unarj_extract_file(const char *dirname, arj_metadata_t *metadata)
 {
 	off_t offset;
-	int ret = CL_SUCCESS;
+	int ret = CL_SUCCESS_T;
 	char filename[1024];
 
 	cli_dbgmsg("in cli_unarj_extract_file\n");
@@ -1027,7 +1027,7 @@ int cli_unarj_extract_file(const char *dirname, arj_metadata_t *metadata)
 		cli_dbgmsg("PASSWORDed file (skipping)\n");
 		metadata->offset += metadata->comp_size;
 		cli_dbgmsg("Target offset: %lu\n", (unsigned long int) metadata->offset);
-		return CL_SUCCESS;
+		return CL_SUCCESS_T;
 	}
 
 	snprintf(filename, 1024, "%s"PATHSEP"file.uar", dirname);

@@ -273,7 +273,7 @@ static int string_assign_concatenated(struct string* dest, const char* prefix, c
 	ret[prefix_len+end-begin]='\0';
 	string_free(dest);
 	string_init_c(dest, ret);
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 /* make a copy of the string between start -> end*/
@@ -289,7 +289,7 @@ static int string_assign_dup(struct string* dest,const char* start,const char* e
 
 	string_free(dest);
 	string_init_c(dest, ret);
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 static void string_assign_null(struct string* dest)
@@ -337,7 +337,7 @@ static int build_regex(regex_t* preg,const char* regex,int nosub)
 			cli_errmsg("Phishcheck: Error in compiling regex, disabling phishing checks. Additionally an Out-of-memory error was encountered while generating a detailed error message\n");
 		return 1;
 	}
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 /* allocates memory */
@@ -876,7 +876,7 @@ int phishing_init(struct cl_engine* engine)
 			return CL_ENULLARG;
 		if(!pchk->is_disabled) {
 			/* already initialized */
-			return CL_SUCCESS;
+			return CL_SUCCESS_T;
 		}
 	}
 
@@ -889,7 +889,7 @@ int phishing_init(struct cl_engine* engine)
 	}
 	pchk->is_disabled = 0;
 	cli_dbgmsg("Phishcheck module initialized\n");
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 void phishing_done(struct cl_engine* engine)
@@ -1217,7 +1217,7 @@ static int hash_match(const struct regex_matcher *rlist, const char *host, size_
 		    cli_dbgmsg("prefix matched\n");
 		    *prefix_matched = 1;
 		} else
-		    return CL_SUCCESS;
+		    return CL_SUCCESS_T;
 	    }
 #endif
 	    if (cli_bm_scanbuff(sha256_dig, 32, &virname, NULL, &rlist->sha256_hashes,0,NULL,NULL,NULL) == CL_VIRUS) {
@@ -1235,7 +1235,7 @@ static int hash_match(const struct regex_matcher *rlist, const char *host, size_
 		}
 	    }
 	}
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 #define URL_MAX_LEN 1024
@@ -1360,7 +1360,7 @@ static int url_hash_match(const struct regex_matcher *rlist, const char *inurl, 
 	if(!rlist || !rlist->sha256_hashes.bm_patterns) {
 		/* no hashes loaded -> don't waste time canonicalizing and
 		 * looking up */
-		return CL_SUCCESS;
+		return CL_SUCCESS_T;
 	}
 	if(!inurl)
 		return CL_EMEM;
@@ -1422,12 +1422,12 @@ static int url_hash_match(const struct regex_matcher *rlist, const char *inurl, 
 		     * hashes for other parts of the URL, they are not in the DB
 		     */
 		    cli_dbgmsg("hostkey prefix not matched, short-circuiting lookups\n");
-		    return CL_SUCCESS;
+		    return CL_SUCCESS_T;
 		}
 #endif
 	    }
 	}
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 /* urls can't contain null pointer, caller must ensure this */

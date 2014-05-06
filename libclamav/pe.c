@@ -2427,7 +2427,7 @@ int cli_scanpe(cli_ctx *ctx)
 	    free(exe_sections);
 	    cli_bytecode_context_destroy(bc_ctx);
 	    return CL_VIRUS;
-	case CL_SUCCESS:
+	case CL_SUCCESS_T:
 	    ndesc = cli_bytecode_context_getresult_file(bc_ctx, &tempfile);
 	    cli_bytecode_context_destroy(bc_ctx);
 	    if (ndesc != -1 && tempfile) {
@@ -4275,7 +4275,7 @@ int cli_scanpe_hnmavocl(cli_ctx *ctx)
 		free(exe_sections);
 		cli_bytecode_context_destroy(bc_ctx);
 		return CL_VIRUS;
-	case CL_SUCCESS:
+	case CL_SUCCESS_T:
 		ndesc = cli_bytecode_context_getresult_file(bc_ctx, &tempfile);
 		cli_bytecode_context_destroy(bc_ctx);
 		if (ndesc != -1 && tempfile) {

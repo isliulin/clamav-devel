@@ -130,7 +130,7 @@ int cli_bm_addpatt(struct cli_matcher *root, struct cli_bm_patt *pattern, const 
     }
 
     root->bm_patterns++;
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cli_bm_init(struct cli_matcher *root)
@@ -151,7 +151,7 @@ int cli_bm_init(struct cli_matcher *root)
     for(i = 0; i < size; i++)
 	root->bm_shift[i] = BM_MIN_LENGTH - BM_BLOCK_SIZE + 1;
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cli_bm_initoff(const struct cli_matcher *root, struct cli_bm_off *data, const struct cli_target_info *info)
@@ -164,7 +164,7 @@ int cli_bm_initoff(const struct cli_matcher *root, struct cli_bm_off *data, cons
     if(!root->bm_patterns) {
 	data->offtab = data->offset = NULL;
 	data->cnt = data->pos = 0;
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     data->cnt = data->pos = 0;
@@ -202,7 +202,7 @@ int cli_bm_initoff(const struct cli_matcher *root, struct cli_bm_off *data, cons
     }
 
     cli_qsort(data->offtab, data->cnt, sizeof(uint32_t), NULL);
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 void cli_bm_freeoff(struct cli_bm_off *data)
@@ -360,7 +360,7 @@ int cli_bm_scanbuff(const unsigned char *buffer, uint32_t length, const char **v
 				continue;
 			    }
 			    ret = cli_caloff(NULL, info, root->type, p->offdata, &off_min, &off_max);
-			    if(ret != CL_SUCCESS) {
+			    if(ret != CL_SUCCESS_T) {
 				cli_errmsg("cli_bm_scanbuff: Can't calculate relative offset in signature for %s\n", p->virname);
 				return ret;
 			    }

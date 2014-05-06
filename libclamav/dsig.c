@@ -144,7 +144,7 @@ int cli_versig(const char *md5, const char *dsig)
     mp_clear(&e);
 
     cli_dbgmsg("cli_versig: Digital signature is correct.\n");
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 #define HASH_LEN    32
@@ -213,5 +213,5 @@ int cli_versig2(const unsigned char *sha256, const char *dsig_str, const char *n
     sha256_update(&ctx, final, sizeof(final));
     sha256_final(&ctx, digest1);
 
-    return memcmp(digest1, digest2, HASH_LEN) ? CL_EVERIFY : CL_SUCCESS;
+    return memcmp(digest1, digest2, HASH_LEN) ? CL_EVERIFY : CL_SUCCESS_T;
 }

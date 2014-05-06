@@ -363,7 +363,7 @@ cli_parse_mbox(const char *dir, cli_ctx *ctx)
 	pthread_mutex_unlock(&tables_mutex);
 #endif
 
-	retcode = CL_SUCCESS;
+	retcode = CL_SUCCESS_T;
 	body = NULL;
 
 	mctx.dir = dir;
@@ -471,7 +471,7 @@ cli_parse_mbox(const char *dir, cli_ctx *ctx)
 					break;
 		} while(fmap_gets(map, buffer, &at, sizeof(buffer) - 1));
 
-		if(retcode == CL_SUCCESS) {
+		if(retcode == CL_SUCCESS_T) {
 			cli_dbgmsg("Extract attachments from email %d\n", messagenumber);
 			body = parseEmailHeaders(m, rfc821);
 		}
@@ -507,7 +507,7 @@ cli_parse_mbox(const char *dir, cli_ctx *ctx)
 		/*
 		 * Write out the last entry in the mailbox
 		 */
-		if((retcode == CL_SUCCESS) && messageGetBody(body)) {
+		if((retcode == CL_SUCCESS_T) && messageGetBody(body)) {
 			messageSetCTX(body, ctx);
 			switch(parseEmailBody(body, NULL, &mctx, 0)) {
 				case OK:
@@ -537,7 +537,7 @@ cli_parse_mbox(const char *dir, cli_ctx *ctx)
 			}
 		}
 
-		if(body->isTruncated && retcode == CL_SUCCESS)
+		if(body->isTruncated && retcode == CL_SUCCESS_T)
 			retcode = CL_EMEM;
 		/*
 		 * Tidy up and quit

@@ -320,7 +320,7 @@ static int prepare_file(chm_metadata_t *metadata)
 		metadata->file_length = read_enc_int(&metadata->chunk_current, metadata->chunk_end);
 		metadata->chunk_entries--;
 		if (section == 1) {
-			return CL_SUCCESS;
+			return CL_SUCCESS_T;
 		}
 	}
 	
@@ -354,7 +354,7 @@ static int read_chunk(chm_metadata_t *metadata)
 		return CL_BREAK;
 	}
 
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 static void print_sys_control(lzx_control_t *lzx_control)
@@ -609,7 +609,7 @@ static int chm_init_metadata(chm_metadata_t *metadata)
 	metadata->ufd = -1;
 	metadata->num_chunks = metadata->chunk_entries = 0;
 	metadata->chunk_data = NULL;
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 void cli_chm_close(chm_metadata_t *metadata)
@@ -642,7 +642,7 @@ int cli_chm_extract_file(char *dirname, chm_metadata_t *metadata, cli_ctx *ctx)
 		return CL_EFORMAT; /* most likely a corrupted file */
 	}
 		
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }	
 
 int cli_chm_prepare_file(chm_metadata_t *metadata)
@@ -656,7 +656,7 @@ int cli_chm_prepare_file(chm_metadata_t *metadata)
 			if (metadata->num_chunks == 0) {
 				return CL_BREAK;
 			}
-			if ((retval = read_chunk(metadata)) != CL_SUCCESS) {
+			if ((retval = read_chunk(metadata)) != CL_SUCCESS_T) {
 				return retval;
 			}
 			metadata->num_chunks--;
@@ -674,7 +674,7 @@ int cli_chm_open(const char *dirname, chm_metadata_t *metadata, cli_ctx *ctx)
 
 	cli_dbgmsg("in cli_chm_open\n");
 	
-	if ((retval = chm_init_metadata(metadata)) != CL_SUCCESS) {
+	if ((retval = chm_init_metadata(metadata)) != CL_SUCCESS_T) {
 		return retval;
 	}
 
@@ -712,7 +712,7 @@ int cli_chm_open(const char *dirname, chm_metadata_t *metadata, cli_ctx *ctx)
 	}
 	
 	while (metadata->num_chunks) {
-		if (read_chunk(metadata) != CL_SUCCESS) {
+		if (read_chunk(metadata) != CL_SUCCESS_T) {
 			cli_dbgmsg("read_chunk failed\n");
 			goto abort;
 		}
@@ -738,7 +738,7 @@ int cli_chm_open(const char *dirname, chm_metadata_t *metadata, cli_ctx *ctx)
 	metadata->chunk_offset = metadata->itsf_hdr.dir_offset+CHM_ITSP_LEN;
 	metadata->num_chunks = metadata->itsp_hdr.index_tail - metadata->itsp_hdr.index_head + 1;
 
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 
 abort:
 	return CL_EFORMAT;

@@ -327,7 +327,7 @@ textToBlob(text *t, blob *b, int destroy)
 			return NULL;
 	}
 
-	if(blobGrow(b, s) != CL_SUCCESS) {
+	if(blobGrow(b, s) != CL_SUCCESS_T) {
 		cli_warnmsg("Couldn't grow the blob: we may be low on memory\n");
 #if	0
 		if(!destroy) {

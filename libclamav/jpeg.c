@@ -56,14 +56,14 @@ int cli_parsejpeg(cli_ctx *ctx)
     cli_dbgmsg("in cli_parsejpeg()\n");
 
     if(fmap_readn(map, buff, offset, 4) != 4)
-	return CL_SUCCESS; /* Ignore */
+	return CL_SUCCESS_T; /* Ignore */
 
     if(!memcmp(buff, "\xff\xd8\xff", 3))
 	offset = 2;
     else if(!memcmp(buff, "\xff\xd9\xff\xd8", 4))
 	offset = 4;
     else
-	return CL_SUCCESS; /* Not a JPEG file */
+	return CL_SUCCESS_T; /* Not a JPEG file */
 
     while(1) {
 	segment++;
@@ -169,14 +169,14 @@ int cli_parsejpeg(cli_ctx *ctx)
 		    cli_warnmsg("cli_parsejpeg: Application Marker before JPG7\n");
 		    return CL_EPARSE;
                 }
-		return CL_SUCCESS;
+		return CL_SUCCESS_T;
 
 	    case 0xda: /* SOS */
 		if(!app) {
 		    cli_warnmsg("cli_parsejpeg: Invalid file structure\n");
 		    return CL_EPARSE;
                 }
-		return CL_SUCCESS;
+		return CL_SUCCESS_T;
 
             case 0xd9: /* EOI */
                 cli_warnmsg("cli_parsejpeg: No image in jpeg\n");
@@ -202,7 +202,7 @@ int cli_parsejpeg(cli_ctx *ctx)
         }
 	prev_segment = marker;
     }
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 /* GIF */
@@ -243,12 +243,12 @@ int cli_parsegif(cli_ctx *ctx)
     cli_dbgmsg("in cli_parsegif()\n");
 
     if(fmap_readn(map, magic, offset, 6) != 6)
-	return CL_SUCCESS; /* Ignore */
+	return CL_SUCCESS_T; /* Ignore */
 
     if(!memcmp(magic, "GIF87a", 6) || !memcmp(magic, "GIF89a", 6))
 	offset = 6;
     else
-	return CL_SUCCESS; /* Not a GIF file */
+	return CL_SUCCESS_T; /* Not a GIF file */
 
     if(fmap_readn(map, &screen_desc, offset, sizeof(screen_desc)) != sizeof(screen_desc)) {
 	cli_warnmsg("cli_parsegif: Can't read Logical Screen Descriptor block\n");
@@ -298,5 +298,5 @@ int cli_parsegif(cli_ctx *ctx)
 	}
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }

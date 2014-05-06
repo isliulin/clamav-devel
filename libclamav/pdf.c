@@ -839,7 +839,7 @@ static int pdf_extract_obj(struct pdf_struct *pdf, struct pdf_obj *obj)
     char fullname[NAME_MAX + 1];
     int fout;
     off_t sum = 0;
-    int rc = CL_SUCCESS;
+    int rc = CL_SUCCESS_T;
     char *ascii_decoded = NULL;
     char *decrypted = NULL;
     int dump = 1;
@@ -1099,7 +1099,7 @@ static int pdf_extract_obj(struct pdf_struct *pdf, struct pdf_obj *obj)
 	 * */
 	lseek(fout, 0, SEEK_SET);
 	rc2 = cli_magic_scandesc(fout, pdf->ctx);
-	if (rc2 == CL_VIRUS || rc == CL_SUCCESS)
+	if (rc2 == CL_VIRUS || rc == CL_SUCCESS_T)
 	    rc = rc2;
 	if ((rc == CL_CLEAN) || ((rc == CL_VIRUS) && (pdf->ctx->options & CL_SCAN_ALLMATCHES))) {
 	    rc2 = run_pdf_hooks(pdf, PDF_PHASE_POSTDUMP, fout, obj - pdf->objs);
@@ -2068,7 +2068,7 @@ int cli_pdf(const char *dir, cli_ctx *ctx, off_t offset)
     if (!pdfver) {
 	cli_dbgmsg("cli_pdf: no PDF- header found\n");
 	noisy_warnmsg("cli_pdf: no PDF- header found\n");
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
     /* Check for PDF-1.[0-9]. Although 1.7 is highest now, allow for future
      * versions */

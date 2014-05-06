@@ -297,7 +297,7 @@ static int tokens_ensure_capacity(struct tokens *tokens, size_t cap)
 		tokens->data = data;
 		tokens->capacity = cap;
 	}
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 static int add_token(struct parser_state *state, const yystype *token)
@@ -322,7 +322,7 @@ static inline int buf_outc(char c, struct buf *buf)
 		buf->pos = 0;
 	}
 	buf->buf[buf->pos++] = c;
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 static inline int buf_outs(const char *s, struct buf *buf)
@@ -346,7 +346,7 @@ static inline int buf_outs(const char *s, struct buf *buf)
 		}
 	}
 	buf->pos = i;
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 static inline void output_space(char last, char current, struct buf *out)
@@ -537,7 +537,7 @@ static int replace_token_range(struct tokens *dst, size_t start, size_t end, con
 		memcpy(&dst->data[start], with->data, len * sizeof(dst->data[0]));
 	}
 	dst->cnt = dst->cnt - (end-start) + len;
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 static int append_tokens(struct tokens *dst, const struct tokens *src)
@@ -549,7 +549,7 @@ static int append_tokens(struct tokens *dst, const struct tokens *src)
 	cli_dbgmsg(MODULE "Appending %lu tokens\n", src->cnt);
 	memcpy(&dst->data[dst->cnt], src->data, src->cnt * sizeof(dst->data[0]));
 	dst->cnt += src->cnt;
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 static void decode_de(yystype *params[], struct text_buffer *txtbuf)
@@ -697,7 +697,7 @@ static int handle_unescape(struct tokens *tokens, size_t start)
 		if(replace_token_range(tokens, start-2, start+2, &new_tokens) < 0)
 			return CL_EMEM;
 	}
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 

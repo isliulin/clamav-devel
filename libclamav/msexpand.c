@@ -88,7 +88,7 @@ struct msexp_hdr {
 	return CL_EWRITE;			\
     wbytes += w;				\
     if(wbytes >= fsize)				\
-	return CL_SUCCESS;			\
+	return CL_SUCCESS_T;			\
     w = 0;
 
 
@@ -116,7 +116,7 @@ int cli_msexpand(cli_ctx *ctx, int ofd)
     cli_dbgmsg("MSEXPAND: File size from header: %u\n", fsize);
 
     if(cli_checklimits("MSEXPAND", ctx, fsize, 0, 0)!=CL_CLEAN)
-        return CL_SUCCESS;
+        return CL_SUCCESS_T;
 
     memset(buff, 0, B_SIZE);
     while(1) {
@@ -172,5 +172,5 @@ int cli_msexpand(cli_ctx *ctx, int ofd)
 	WRITEBYTES;
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }

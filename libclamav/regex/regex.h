@@ -37,18 +37,20 @@
 
 #ifndef _REGEX_H_
 #define	_REGEX_H_
+#define re_pattern_buffer regex_t
 
 #include <sys/types.h>
 
 /* types */
 typedef off_t regoff_t;
+//typedef int regoff_t;
 
 typedef struct {
 	int re_magic;
 	size_t re_nsub;		/* number of parenthesized subexpressions */
 	const char *re_endp;	/* end pointer for REG_PEND */
 	struct re_guts *re_g;	/* none of your business :-) */
-} regex_t;
+}regex_t;
 
 typedef struct {
 	regoff_t rm_so;		/* start of match */

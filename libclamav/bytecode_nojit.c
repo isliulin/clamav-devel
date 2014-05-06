@@ -51,12 +51,12 @@ int cli_vm_execute_jit(const struct cli_all_bc *bcs, struct cli_bc_ctx *ctx, con
 
 int cli_bytecode_init_jit(struct cli_all_bc *allbc, unsigned dconfmask)
 {
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cli_bytecode_done_jit(struct cli_all_bc *allbc, int partial)
 {
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 void cli_bytecode_debug(int argc, char **argv) {

@@ -322,7 +322,7 @@ cli_untar(const char *dir, unsigned int posix, cli_ctx *ctx)
 			if (limitnear > 0) {
 				currsize += nbytes;
 				cli_dbgmsg("cli_untar: Approaching limit...\n");
-				if (cli_checklimits("cli_untar", ctx, (unsigned long)currsize, 0, 0) != CL_SUCCESS) {
+				if (cli_checklimits("cli_untar", ctx, (unsigned long)currsize, 0, 0) != CL_SUCCESS_T) {
 					// Limit would be exceeded by this file, suppress writing beyond limit
 					// Need to keep reading to get to end of file chunk
 					skipwrite++;

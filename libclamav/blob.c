@@ -346,7 +346,7 @@ blobGrow(blob *b, size_t len)
 	assert(b->magic == BLOBCLASS);
 
 	if(len == 0)
-		return CL_SUCCESS;
+		return CL_SUCCESS_T;
 
 	if(b->isClosed) {
 		/*
@@ -372,7 +372,7 @@ blobGrow(blob *b, size_t len)
 		}
 	}
 
-	return (b->data) ? CL_SUCCESS : CL_EMEM;
+	return (b->data) ? CL_SUCCESS_T : CL_EMEM;
 }
 
 fileblob *
@@ -525,7 +525,7 @@ fileblobSetFilename(fileblob *fb, const char *dir, const char *filename)
 
 	assert(filename != NULL);
 	
-	if (cli_gentempfd(dir, &fullname, &fb->fd)!=CL_SUCCESS) return;
+	if (cli_gentempfd(dir, &fullname, &fb->fd)!=CL_SUCCESS_T) return;
 
 	cli_dbgmsg("fileblobSetFilename: file %s saved to %s\n", filename, fullname);
 

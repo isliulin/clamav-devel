@@ -38,6 +38,10 @@
 #define TYPE_SIZE    3	/* number possibly followed by modifers (M/m or K/k) */
 #define TYPE_BOOL    4	/* boolean */
 
+#if defined (__cplusplus)
+extern "C"{
+#endif
+
 struct optstruct {
     char *name;
     char *cmd;
@@ -72,5 +76,9 @@ const struct optstruct *optget(const struct optstruct *opts, const char *name);
 void optfree(struct optstruct *opts);
 
 struct optstruct *optparse(const char *cfgfile, int argc, char **argv, int verbose, int toolmask, int ignore, struct optstruct *oldopts);
+
+#if defined (__cplusplus)
+}
+#endif
 
 #endif

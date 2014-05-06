@@ -1451,7 +1451,7 @@ int messageSavePartial(message *m, const char *dir, const char *md5id, unsigned 
 	if(!fb)
 		return CL_EFORMAT;
 	fileblobDestroy(fb);
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 /*

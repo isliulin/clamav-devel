@@ -330,7 +330,7 @@ static int cli_tgzload(int fd, struct cl_engine *engine, unsigned int *signo, un
 	    }
 	    if(!dbinfo) {
 		cli_tgzload_cleanup(compr, dbio, fdd);
-		return CL_SUCCESS;
+		return CL_SUCCESS_T;
 	    } else {
 		db = dbinfo;
 		while(db && strcmp(db->name, name))
@@ -370,7 +370,7 @@ static int cli_tgzload(int fd, struct cl_engine *engine, unsigned int *signo, un
     }
 
     cli_tgzload_cleanup(compr, dbio, fdd);
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 struct cl_cvd *cl_cvdparse(const char *head)
@@ -520,7 +520,7 @@ static int cli_cvdverify(FILE *fs, struct cl_cvd *cvdpt, unsigned int skipsig)
 
     if(skipsig) {
 	cl_cvdfree(cvd);
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     md5 = cli_hashstream(fs, NULL, 1);
@@ -547,7 +547,7 @@ static int cli_cvdverify(FILE *fs, struct cl_cvd *cvdpt, unsigned int skipsig)
 
     free(md5);
     cl_cvdfree(cvd);
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cl_cvdverify(const char *file)
@@ -608,11 +608,11 @@ int cli_cvdload(FILE *fs, struct cl_engine *engine, unsigned int *signo, unsigne
 	    if(dupcvd.version > cvd.version) {
 		cli_warnmsg("Detected duplicate databases %s and %s. The %s database is older and will not be loaded, you should manually remove it from the database directory.\n", filename, dupname, filename);
 		free(dupname);
-		return CL_SUCCESS;
+		return CL_SUCCESS_T;
 	    } else if(dupcvd.version == cvd.version && !dbtype) {
 		cli_warnmsg("Detected duplicate databases %s and %s, please manually remove one of them\n", filename, dupname);
 		free(dupname);
-		return CL_SUCCESS;
+		return CL_SUCCESS_T;
 	    }
 	}
 	free(dupname);
@@ -650,7 +650,7 @@ int cli_cvdload(FILE *fs, struct cl_engine *engine, unsigned int *signo, unsigne
 	ret = cli_tgzload(cfd, engine, signo, options | CL_DB_UNSIGNED, &dbio, NULL);
     else
 	ret = cli_tgzload(cfd, engine, signo, options | CL_DB_OFFICIAL, &dbio, NULL);
-    if(ret != CL_SUCCESS)
+    if(ret != CL_SUCCESS_T)
 	return ret;
 
     dbinfo = engine->dbinfo;

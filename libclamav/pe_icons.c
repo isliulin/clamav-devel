@@ -1210,7 +1210,7 @@ static int parseicon(icon_groupset *set, uint32_t rva, cli_ctx *ctx, struct cli_
     unsigned int special_32_is_32 = 0;
 
     if(!ctx || !ctx->engine || !(matcher=ctx->engine->iconcheck))
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     map = *ctx->fmap;
     tempd = (cli_debug_flag && ctx->engine->keeptmp) ? (ctx->engine->tmpdir ? ctx->engine->tmpdir : cli_gettmpdir()) : NULL;
     icoff = cli_rawaddr(rva, exe_sections, nsections, &err, map->len, hdr_size);
@@ -1218,19 +1218,19 @@ static int parseicon(icon_groupset *set, uint32_t rva, cli_ctx *ctx, struct cli_
     /* read the bitmap header */
     if(err || !(rawimage = fmap_need_off_once(map, icoff, 4))) {
 	cli_dbgmsg("parseicon: offset to icon is out of file\n");
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     rva = cli_readint32(rawimage);
     icoff = cli_rawaddr(rva, exe_sections, nsections, &err, map->len, hdr_size);
     if(err || fmap_readn(map, &bmphdr, icoff, sizeof(bmphdr)) != sizeof(bmphdr)) {
 	cli_dbgmsg("parseicon: bmp header is out of file\n");
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     if(READ32(bmphdr.sz) < sizeof(bmphdr)) {
 	cli_dbgmsg("parseicon: BMP header too small\n");
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     /* seek to the end of v4/v5 header */
@@ -1241,11 +1241,11 @@ static int parseicon(icon_groupset *set, uint32_t rva, cli_ctx *ctx, struct cli_
     depth = READ16(bmphdr.depth);
     if(width > 256 || height > 256 || width < 16 || height < 16) {
 	cli_dbgmsg("parseicon: Image too small or too big (%ux%u)\n", width, height);
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
     if(width < height * 3 / 4 || height < width * 3 / 4) {
 	cli_dbgmsg("parseicon: Image not square enough (%ux%u)\n", width, height);
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }	
 
     /* scaling logic */
@@ -1266,13 +1266,13 @@ static int parseicon(icon_groupset *set, uint32_t rva, cli_ctx *ctx, struct cli_
     case 0:
 	/* PNG OR JPEG */
 	cli_dbgmsg("parseicon: PNG icons are not yet sported\n");
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     case 1:
     case 4:
     case 8:
 	/* HAVE PALETTE */
 	if(!(palette = fmap_need_off(map, icoff, (1<<depth) * sizeof(int))))
-	    return CL_SUCCESS;
+	    return CL_SUCCESS_T;
 	icoff += (1<<depth) * sizeof(int);
 	/* for(j=0; j<pcolcnt; j++) */
 	/* cli_dbgmsg("Palette[%u] = %08x\n", j, palette[j]); */
@@ -1292,11 +1292,11 @@ static int parseicon(icon_groupset *set, uint32_t rva, cli_ctx *ctx, struct cli_
     
     if(!(rawimage = fmap_need_off_once(map, icoff, height * (scanlinesz + andlinesz)))) {
 	if(palette) fmap_unneed_ptr(map, palette, (1<<depth) * sizeof(int));
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
     if(!(imagedata = cli_malloc(width * height * sizeof(*imagedata)))) {
 	if(palette) fmap_unneed_ptr(map, palette, (1<<depth) * sizeof(int));
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     /* decode the image to an RGBA array */
@@ -1436,7 +1436,7 @@ static int parseicon(icon_groupset *set, uint32_t rva, cli_ctx *ctx, struct cli_
 	    scalex = (double)width / newsize;
 	    scaley = (double)height / newsize;
 	    if(!(newdata = cli_malloc(newsize * newsize * sizeof(*newdata)))) {
-		return CL_SUCCESS;
+		return CL_SUCCESS_T;
 	    }
 	    cli_dbgmsg("parseicon: Slow scaling to %ux%u (%f, %f)\n", newsize, newsize, scalex, scaley);
 	    for(y = 0; y<newsize; y++) {
@@ -1525,7 +1525,7 @@ static int parseicon(icon_groupset *set, uint32_t rva, cli_ctx *ctx, struct cli_
 	}
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 void cli_icongroupset_add(const char *groupname, icon_groupset *set, unsigned int type, cli_ctx *ctx) {

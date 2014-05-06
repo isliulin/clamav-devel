@@ -227,7 +227,7 @@ int cli_ac_addpatt(struct cli_matcher *root, struct cli_ac_patt *pattern)
 			    ph = ph->next_same;
 			pattern->next_same = ph->next_same;
 			ph->next_same = pattern;
-			return CL_SUCCESS;
+			return CL_SUCCESS_T;
 		    }
 		}
 	    }
@@ -244,7 +244,7 @@ int cli_ac_addpatt(struct cli_matcher *root, struct cli_ac_patt *pattern)
 	pt->list = pattern;
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 struct bfs_list {
@@ -272,7 +272,7 @@ static int bfs_enqueue(struct bfs_list **bfs, struct bfs_list **last, struct cli
 	*bfs = *last = new;
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static struct cli_ac_node *bfs_dequeue(struct bfs_list **bfs, struct bfs_list **last)
@@ -372,7 +372,7 @@ static int ac_maketrans(struct cli_matcher *root)
 	}
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cli_ac_buildtrie(struct cli_matcher *root)
@@ -382,7 +382,7 @@ int cli_ac_buildtrie(struct cli_matcher *root)
 
     if(!root->ac_root) {
 	cli_dbgmsg("cli_ac_buildtrie: AC pattern matcher is not initialised\n");
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 
     if (root->filter)
@@ -423,7 +423,7 @@ int cli_ac_init(struct cli_matcher *root, uint8_t mindepth, uint8_t maxdepth, ui
 	filter_init(root->filter);
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 #ifdef USE_MPOOL
@@ -1018,7 +1018,7 @@ int cli_ac_initdata(struct cli_ac_data *data, uint32_t partsigs, uint32_t lsigs,
 
     data->min_partno = 1;
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cli_ac_caloff(const struct cli_matcher *root, struct cli_ac_data *data, const struct cli_target_info *info)
@@ -1042,7 +1042,7 @@ int cli_ac_caloff(const struct cli_matcher *root, struct cli_ac_data *data, cons
 	}
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 void cli_ac_freedata(struct cli_ac_data *data)
@@ -1077,7 +1077,7 @@ void cli_ac_freedata(struct cli_ac_data *data)
     }
 }
 
-/* returns only CL_SUCCESS or CL_EMEM */
+/* returns only CL_SUCCESS_T or CL_EMEM */
 inline static int ac_addtype(struct cli_matched_type **list, cli_file_t type, off_t offset, const cli_ctx *ctx)
 {
 	struct cli_matched_type *tnode, *tnode_last;
@@ -1085,9 +1085,9 @@ inline static int ac_addtype(struct cli_matched_type **list, cli_file_t type, of
 
     if(type == CL_TYPE_ZIPSFX) {
 	if(*list && ctx && ctx->engine->maxfiles && (*list)->cnt > ctx->engine->maxfiles)
-	    return CL_SUCCESS;
+	    return CL_SUCCESS_T;
     } else if(*list && (*list)->cnt >= MAX_EMBEDDED_OBJ)
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 
     if(!(tnode = cli_calloc(1, sizeof(struct cli_matched_type)))) {
 	cli_errmsg("cli_ac_addtype: Can't allocate memory for new type node\n");
@@ -1107,7 +1107,7 @@ inline static int ac_addtype(struct cli_matched_type **list, cli_file_t type, of
 	*list = tnode;
 
     (*list)->cnt++;
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 static inline void lsig_sub_matched(const struct cli_matcher *root, struct cli_ac_data *mdata, uint32_t lsigid1, uint32_t lsigid2, uint32_t realoff, int partial)
@@ -1478,7 +1478,7 @@ int cli_ac_addsig(struct cli_matcher *root, const char *virname, const char *hex
 	uint16_t i, j, ppos = 0, pend, *dec, nzpos = 0;
 	uint8_t wprefix = 0, zprefix = 1, plen = 0, nzplen = 0;
 	struct cli_ac_special *newspecial, *specialpt, **newtable;
-	int ret, error = CL_SUCCESS;
+	int ret, error = CL_SUCCESS_T;
 
 
     if(!root) {
@@ -1879,7 +1879,7 @@ int cli_ac_addsig(struct cli_matcher *root, const char *virname, const char *hex
 	root->ac_lsigtable[new->lsigid[1]]->virname = new->virname;
 
     ret = cli_caloff(offset, NULL, root->type, new->offdata, &new->offset_min, &new->offset_max);
-    if(ret != CL_SUCCESS) {
+    if(ret != CL_SUCCESS_T) {
 	mpool_free(root->mempool, new->prefix ? new->prefix : new->pattern);
 	mpool_ac_free_special(root->mempool, new);
 	mpool_free(root->mempool, new->virname);
@@ -1907,5 +1907,5 @@ int cli_ac_addsig(struct cli_matcher *root, const char *virname, const char *hex
 	root->ac_reloff_num++;
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }

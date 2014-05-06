@@ -300,7 +300,7 @@ int cl_init(unsigned int initoptions)
 #ifdef HAVE_LIBXML2
     xmlInitParser();
 #endif
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 struct cl_engine *cl_engine_new(void)
@@ -508,7 +508,7 @@ int cl_engine_set_num(struct cl_engine *engine, enum cl_engine_field field, long
 	    return CL_EARG;
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 long long cl_engine_get_num(const struct cl_engine *engine, enum cl_engine_field field, int *err)
@@ -521,7 +521,7 @@ long long cl_engine_get_num(const struct cl_engine *engine, enum cl_engine_field
     }
 
     if(err)
-	*err = CL_SUCCESS;
+	*err = CL_SUCCESS_T;
 
     switch(field) {
 	case CL_ENGINE_DB_OPTIONS:
@@ -599,7 +599,7 @@ int cl_engine_set_str(struct cl_engine *engine, enum cl_engine_field field, cons
 	    return CL_EARG;
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 const char *cl_engine_get_str(const struct cl_engine *engine, enum cl_engine_field field, int *err)
@@ -612,7 +612,7 @@ const char *cl_engine_get_str(const struct cl_engine *engine, enum cl_engine_fie
     }
 
     if(err)
-	*err = CL_SUCCESS;
+	*err = CL_SUCCESS_T;
 
     switch(field) {
 	case CL_ENGINE_PUA_CATEGORIES:
@@ -720,7 +720,7 @@ int cl_engine_settings_apply(struct cl_engine *engine, const struct cl_settings 
     engine->cb_hash = settings->cb_hash;
     engine->cb_meta = settings->cb_meta;
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cl_engine_settings_free(struct cl_settings *settings)
@@ -731,11 +731,11 @@ int cl_engine_settings_free(struct cl_settings *settings)
     free(settings->tmpdir);
     free(settings->pua_cats);
     free(settings);
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int cli_checklimits(const char *who, cli_ctx *ctx, unsigned long need1, unsigned long need2, unsigned long need3) {
-    int ret = CL_SUCCESS;
+    int ret = CL_SUCCESS_T;
     unsigned long needed;
 
     /* if called without limits, go on, unpack, scan */

@@ -128,7 +128,7 @@ ole2_list_init(ole2_list_t * list)
 {
     list->Head = NULL;
     list->Size = 0;
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int
@@ -159,7 +159,7 @@ ole2_list_push(ole2_list_t * list, uint32_t val)
 
     list->Head = new_node;
     (list->Size)++;
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 uint32_t
@@ -187,7 +187,7 @@ ole2_list_delete(ole2_list_t * list)
 {
     while (!ole2_list_is_empty(list))
         ole2_list_pop(list);
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 #ifdef HAVE_PRAGMA_PACK
@@ -514,21 +514,21 @@ ole2_walk_property_tree(ole2_header_t * hdr, const char *dir, int32_t prop_index
     int             ret, func_ret;
 
     ole2_listmsg("ole2_walk_property_tree() called\n");
-    func_ret = CL_SUCCESS;
+    func_ret = CL_SUCCESS_T;
     ole2_list_init(&node_list);
 
     ole2_listmsg("rec_level: %d\n", rec_level);
     ole2_listmsg("file_count: %d\n", *file_count);
 
     if ((rec_level > 100) || (*file_count > 100000)) {
-        return CL_SUCCESS;
+        return CL_SUCCESS_T;
     }
     if (ctx && ctx->engine->maxreclevel && (rec_level > ctx->engine->maxreclevel)) {
         cli_dbgmsg("OLE2: Recursion limit reached (max: %d)\n", ctx->engine->maxreclevel);
-        return CL_SUCCESS;
+        return CL_SUCCESS_T;
     }
     //push the 'root' node for the level onto the local list
-    if ((ret=ole2_list_push(&node_list, prop_index)) != CL_SUCCESS) {
+    if ((ret=ole2_list_push(&node_list, prop_index)) != CL_SUCCESS_T) {
         ole2_list_delete(&node_list);
         return ret;
     }
@@ -603,7 +603,7 @@ ole2_walk_property_tree(ole2_header_t * hdr, const char *dir, int32_t prop_index
             hdr->sbat_root_start = prop_block[idx].start_block;
             if (prop_block[idx].child != -1) {
                 ret = ole2_walk_property_tree(hdr, dir, prop_block[idx].child, handler, rec_level + 1, file_count, ctx, scansize);
-                if (ret != CL_SUCCESS) {
+                if (ret != CL_SUCCESS_T) {
                     if ((ctx->options & CL_SCAN_ALLMATCHES) && (ret == CL_VIRUS)) {
                         func_ret = ret;
                     }
@@ -614,13 +614,13 @@ ole2_walk_property_tree(ole2_header_t * hdr, const char *dir, int32_t prop_index
                 }
             }
             if (prop_block[idx].prev != -1) {
-	        if ((ret=ole2_list_push(&node_list, prop_block[idx].prev)) != CL_SUCCESS) {
+	        if ((ret=ole2_list_push(&node_list, prop_block[idx].prev)) != CL_SUCCESS_T) {
 		    ole2_list_delete(&node_list);
 		    return ret;
 		}
 	    }
 	    if (prop_block[idx].next != -1) {
-	        if ((ret=ole2_list_push(&node_list, prop_block[idx].next)) != CL_SUCCESS) {
+	        if ((ret=ole2_list_push(&node_list, prop_block[idx].next)) != CL_SUCCESS_T) {
 		    ole2_list_delete(&node_list);
 		    return ret;
 		}
@@ -638,7 +638,7 @@ ole2_walk_property_tree(ole2_header_t * hdr, const char *dir, int32_t prop_index
                 *scansize -= prop_block[idx].size;
                 ole2_listmsg("running file handler\n");
                 ret = handler(hdr, &prop_block[idx], dir, ctx);
-                if (ret != CL_SUCCESS) {
+                if (ret != CL_SUCCESS_T) {
                     if ((ctx->options & CL_SCAN_ALLMATCHES) && (ret == CL_VIRUS)) {
                         func_ret = ret;
                     }
@@ -653,7 +653,7 @@ ole2_walk_property_tree(ole2_header_t * hdr, const char *dir, int32_t prop_index
             }
             if (prop_block[idx].child != -1) {
                 ret = ole2_walk_property_tree(hdr, dir, prop_block[idx].child, handler, rec_level, file_count, ctx, scansize);
-                if (ret != CL_SUCCESS) {
+                if (ret != CL_SUCCESS_T) {
                     if ((ctx->options & CL_SCAN_ALLMATCHES) && (ret == CL_VIRUS)) {
                         func_ret = ret;
                     }
@@ -664,13 +664,13 @@ ole2_walk_property_tree(ole2_header_t * hdr, const char *dir, int32_t prop_index
                 }
             }
             if (prop_block[idx].prev != -1) {
-	        if ((ret=ole2_list_push(&node_list, prop_block[idx].prev)) != CL_SUCCESS) {
+	        if ((ret=ole2_list_push(&node_list, prop_block[idx].prev)) != CL_SUCCESS_T) {
 		    ole2_list_delete(&node_list);
 		    return ret;
 		}
             }
             if (prop_block[idx].next != -1) {
-                if ((ret=ole2_list_push(&node_list, prop_block[idx].next)) != CL_SUCCESS) {
+                if ((ret=ole2_list_push(&node_list, prop_block[idx].next)) != CL_SUCCESS_T) {
 		    ole2_list_delete(&node_list);
 		    return ret;
 		}
@@ -697,7 +697,7 @@ ole2_walk_property_tree(ole2_header_t * hdr, const char *dir, int32_t prop_index
                 dirname = NULL;
             if (prop_block[idx].child != -1) {
                 ret = ole2_walk_property_tree(hdr, dirname, prop_block[idx].child, handler, rec_level + 1, file_count, ctx, scansize);
-                if (ret != CL_SUCCESS) {
+                if (ret != CL_SUCCESS_T) {
                     if ((ctx->options & CL_SCAN_ALLMATCHES) && (ret == CL_VIRUS)) {
                         func_ret = ret;
                     }
@@ -708,13 +708,13 @@ ole2_walk_property_tree(ole2_header_t * hdr, const char *dir, int32_t prop_index
                 }
             }
             if (prop_block[idx].prev != -1) {
-	        if ((ret=ole2_list_push(&node_list, prop_block[idx].prev)) != CL_SUCCESS) {
+	        if ((ret=ole2_list_push(&node_list, prop_block[idx].prev)) != CL_SUCCESS_T) {
 		    ole2_list_delete(&node_list);
 		    return ret;
 		}
             }
             if (prop_block[idx].next != -1) {
-                if ((ret=ole2_list_push(&node_list, prop_block[idx].next)) != CL_SUCCESS) {
+                if ((ret=ole2_list_push(&node_list, prop_block[idx].next)) != CL_SUCCESS_T) {
 		    ole2_list_delete(&node_list);
 		    return ret;
 		}
@@ -745,11 +745,11 @@ handler_writefile(ole2_header_t * hdr, property_t * prop, const char *dir, cli_c
 
     if (prop->type != 2) {
         /* Not a file */
-        return CL_SUCCESS;
+        return CL_SUCCESS_T;
     }
     if (prop->name_size > 64) {
         cli_dbgmsg("OLE2 [handler_writefile]: property name too long: %d\n", prop->name_size);
-        return CL_SUCCESS;
+        return CL_SUCCESS_T;
     }
     name = get_property_name2(prop->name, prop->name_size);
     if (name)
@@ -765,7 +765,7 @@ handler_writefile(ole2_header_t * hdr, property_t * prop, const char *dir, cli_c
     ofd = open(newname, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, S_IRWXU);
     if (ofd < 0) {
         cli_errmsg("OLE2 [handler_writefile]: failed to create file: %s\n", newname);
-        return CL_SUCCESS;
+        return CL_SUCCESS_T;
     }
     current_block = prop->start_block;
     len = prop->size;
@@ -789,7 +789,7 @@ handler_writefile(ole2_header_t * hdr, property_t * prop, const char *dir, cli_c
             close(ofd);
             free(buff);
             cli_bitset_free(blk_bitset);
-            return CL_SUCCESS;
+            return CL_SUCCESS_T;
         }
         /* Check we aren't in a loop */
         if (cli_bitset_test(blk_bitset, (unsigned long)current_block)) {
@@ -813,7 +813,7 @@ handler_writefile(ole2_header_t * hdr, property_t * prop, const char *dir, cli_c
                 close(ofd);
                 free(buff);
                 cli_bitset_free(blk_bitset);
-                return CL_SUCCESS;
+                return CL_SUCCESS_T;
             }
             /* buff now contains the block with N small blocks in it */
             offset = (1 << hdr->log2_small_block_size) * (current_block % (1 << (hdr->log2_big_block_size - hdr->log2_small_block_size)));
@@ -832,7 +832,7 @@ handler_writefile(ole2_header_t * hdr, property_t * prop, const char *dir, cli_c
                 close(ofd);
                 free(buff);
                 cli_bitset_free(blk_bitset);
-                return CL_SUCCESS;
+                return CL_SUCCESS_T;
             }
             if (cli_writen(ofd, buff, MIN(len, (1 << hdr->log2_big_block_size))) !=
                     MIN(len, (1 << hdr->log2_big_block_size))) {
@@ -848,7 +848,7 @@ handler_writefile(ole2_header_t * hdr, property_t * prop, const char *dir, cli_c
     close(ofd);
     free(buff);
     cli_bitset_free(blk_bitset);
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 /* enum file Handler - checks for VBA presence */
@@ -865,7 +865,7 @@ handler_enum(ole2_header_t * hdr, property_t * prop, const char *dir, cli_ctx * 
             free(name);
         }
     }
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 
@@ -880,7 +880,7 @@ handler_otf(ole2_header_t * hdr, property_t * prop, const char *dir, cli_ctx * c
 
     if (prop->type != 2) {
         /* Not a file */
-        return CL_SUCCESS;
+        return CL_SUCCESS_T;
     }
     print_ole2_property(prop);
 
@@ -986,7 +986,7 @@ handler_otf(ole2_header_t * hdr, property_t * prop, const char *dir, cli_ctx * c
         }
     }
     free(tempfile);
-    return ret == CL_VIRUS ? CL_VIRUS : CL_SUCCESS;
+    return ret == CL_VIRUS ? CL_VIRUS : CL_SUCCESS_T;
 
 }
 

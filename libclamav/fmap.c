@@ -743,7 +743,7 @@ int fmap_dump_to_file(fmap_t *map, const char *tmpdir, char **outname, int *outf
 
     cli_dbgmsg("fmap_dump_to_file: dumping fmap not backed by file...\n");
     ret = cli_gentempfd(tmpdir, &tmpname, &tmpfd);
-    if(ret != CL_SUCCESS) {
+    if(ret != CL_SUCCESS_T) {
         cli_dbgmsg("fmap_dump_to_file: failed to generate temporary file.\n");
         return ret;
     }
@@ -770,7 +770,7 @@ int fmap_dump_to_file(fmap_t *map, const char *tmpdir, char **outname, int *outf
 
     *outname = tmpname;
     *outfd = tmpfd;
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 }
 
 int fmap_fd(fmap_t *m)

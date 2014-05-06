@@ -498,7 +498,7 @@ int cli_scanmacho(cli_ctx *ctx, struct cli_exe_info *fileinfo)
 	return 0;
     } else {
 	free(sections);
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
     }
 }
 

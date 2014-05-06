@@ -101,7 +101,7 @@ static int nsis_init(struct nsis_st *n) {
     nsis_inflateInit(&n->z);
     n->freecomp=0;
   }
-  return CL_SUCCESS;
+  return CL_SUCCESS_T;
 }
 
 static void nsis_shutdown(struct nsis_st *n) {
@@ -133,7 +133,7 @@ static int nsis_decomp(struct nsis_st *n) {
     n->bz.next_out = n->nsis.next_out;
     switch (nsis_BZ2_bzDecompress(&n->bz)) {
     case BZ_OK:
-      ret = CL_SUCCESS;
+      ret = CL_SUCCESS_T;
       break;
     case BZ_STREAM_END:
       ret = CL_BREAK;
@@ -150,7 +150,7 @@ static int nsis_decomp(struct nsis_st *n) {
     n->lz.next_out = n->nsis.next_out;
     switch (cli_LzmaDecode(&n->lz)) {
     case LZMA_RESULT_OK:
-      ret = CL_SUCCESS;
+      ret = CL_SUCCESS_T;
       break;
     case LZMA_STREAM_END:
       ret = CL_BREAK;
@@ -168,7 +168,7 @@ static int nsis_decomp(struct nsis_st *n) {
 /*  switch (inflate(&n->z, Z_NO_FLUSH)) { */
     switch (nsis_inflate(&n->z)) {
     case Z_OK:
-      ret = CL_SUCCESS;
+      ret = CL_SUCCESS_T;
       break;
     case Z_STREAM_END:
       ret = CL_BREAK;
@@ -223,7 +223,7 @@ static int nsis_unpack_next(struct nsis_st *n, cli_ctx *ctx) {
     loops = EC32(size);
     if (!(size = (loops&~0x80000000))) {
       cli_dbgmsg("NSIS: empty file found\n");
-      return CL_SUCCESS;
+      return CL_SUCCESS_T;
     }
     if (n->asz <4 || size > n->asz-4) {
       cli_dbgmsg("NSIS: next file is outside the archive\n");
@@ -251,7 +251,7 @@ static int nsis_unpack_next(struct nsis_st *n, cli_ctx *ctx) {
 	return CL_EWRITE;
       }
     } else {
-      if ((ret=nsis_init(n))!=CL_SUCCESS) {
+      if ((ret=nsis_init(n))!=CL_SUCCESS_T) {
 	cli_dbgmsg("NSIS: decompressor init failed"__AT__"\n");
 	close(n->ofd);
 	return ret;
@@ -263,7 +263,7 @@ static int nsis_unpack_next(struct nsis_st *n, cli_ctx *ctx) {
       n->nsis.avail_out = BUFSIZ;
       loops=0;
 
-      while ((ret=nsis_decomp(n))==CL_SUCCESS) {
+      while ((ret=nsis_decomp(n))==CL_SUCCESS_T) {
 	if ((size = n->nsis.next_out - obuf)) {
 	  gotsome=1;
 	  if (cli_writen(n->ofd, obuf, size) != (ssize_t) size) {
@@ -298,10 +298,10 @@ static int nsis_unpack_next(struct nsis_st *n, cli_ctx *ctx) {
 	}
       }
 
-      if (ret != CL_SUCCESS && ret != CL_BREAK) {
+      if (ret != CL_SUCCESS_T && ret != CL_BREAK) {
 	cli_dbgmsg("NSIS: bad stream"__AT__"\n");
 	if (gotsome) {
-	  ret = CL_SUCCESS;
+	  ret = CL_SUCCESS_T;
 	} else {
 	  ret = CL_EMAXSIZE;
 	  close(n->ofd);
@@ -311,11 +311,11 @@ static int nsis_unpack_next(struct nsis_st *n, cli_ctx *ctx) {
 
     }
 
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
 
   } else {
     if (!n->freeme) {
-      if ((ret=nsis_init(n))!=CL_SUCCESS) {
+      if ((ret=nsis_init(n))!=CL_SUCCESS_T) {
 	cli_dbgmsg("NSIS: decompressor init failed\n");
 	close(n->ofd);
 	return ret;
@@ -338,7 +338,7 @@ static int nsis_unpack_next(struct nsis_st *n, cli_ctx *ctx) {
     n->nsis.avail_out = 4;
     loops = 0;
 
-    while ((ret=nsis_decomp(n))==CL_SUCCESS) {
+    while ((ret=nsis_decomp(n))==CL_SUCCESS_T) {
       if (n->nsis.next_out - obuf == 4) break;
       if (++loops > 20) {
 	cli_dbgmsg("NSIS: xs looping, breaking out"__AT__"\n");
@@ -347,7 +347,7 @@ static int nsis_unpack_next(struct nsis_st *n, cli_ctx *ctx) {
       }
     }
 
-    if (ret != CL_SUCCESS) {
+    if (ret != CL_SUCCESS_T) {
       cli_dbgmsg("NSIS: bad stream"__AT__"\n");
       close(n->ofd);
       return CL_EFORMAT;
@@ -363,7 +363,7 @@ static int nsis_unpack_next(struct nsis_st *n, cli_ctx *ctx) {
     n->nsis.avail_out = MIN(BUFSIZ,size);
     loops = 0;
 
-    while (size && (ret=nsis_decomp(n))==CL_SUCCESS) {
+    while (size && (ret=nsis_decomp(n))==CL_SUCCESS_T) {
       unsigned int wsz;
       if ((wsz = n->nsis.next_out - obuf)) {
 	gotsome=1;
@@ -402,12 +402,12 @@ static int nsis_unpack_next(struct nsis_st *n, cli_ctx *ctx) {
 
     if (ret == CL_EFORMAT || ret == CL_BREAK) {
       n->eof=1;
-    } else if (ret != CL_SUCCESS) {
+    } else if (ret != CL_SUCCESS_T) {
       cli_dbgmsg("NSIS: bad stream"__AT__"\n");
       close(n->ofd);
       return CL_EFORMAT;
     }
-    return CL_SUCCESS;
+    return CL_SUCCESS_T;
   }
 
 }
@@ -510,7 +510,7 @@ int cli_scannulsft(cli_ctx *ctx, off_t offset) {
 
     do {
         ret = cli_nsis_unpack(&nsist, ctx);
-	if (ret == CL_SUCCESS) {
+	if (ret == CL_SUCCESS_T) {
 	  cli_dbgmsg("NSIS: Successully extracted file #%u\n", nsist.fno);
 	  if (lseek(nsist.ofd, 0, SEEK_SET) == -1) {
           cli_dbgmsg("NSIS: call to lseek() failed\n");
@@ -525,9 +525,9 @@ int cli_scannulsft(cli_ctx *ctx, off_t offset) {
 	  if(!ctx->engine->keeptmp)
 	    if(cli_unlink(nsist.ofn)) ret = CL_EUNLINK;
 	} else if(ret == CL_EMAXSIZE) {
-	    ret = nsist.solid ? CL_BREAK : CL_SUCCESS;
+	    ret = nsist.solid ? CL_BREAK : CL_SUCCESS_T;
 	}
-    } while(ret == CL_SUCCESS);
+    } while(ret == CL_SUCCESS_T);
 
     if(ret == CL_BREAK || ret == CL_EMAXFILES)
 	ret = CL_CLEAN;

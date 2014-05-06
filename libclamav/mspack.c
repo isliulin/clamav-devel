@@ -135,7 +135,7 @@ static int mszip_read_input(struct mszip_stream *zip) {
       cli_dbgmsg("mszip_read_input: First CL_BREAK reached.\n");
       zip->i_ptr = zip->i_end;
       zip->last = nread;
-      return CL_SUCCESS;
+      return CL_SUCCESS_T;
     }
     else
       return zip->error = CL_EFORMAT;
@@ -145,7 +145,7 @@ static int mszip_read_input(struct mszip_stream *zip) {
   zip->i_ptr = &zip->inbuf[0];
   zip->i_end = &zip->inbuf[nread];
 
-  return CL_SUCCESS;
+  return CL_SUCCESS_T;
 }
 
 /* inflate() error codes */
@@ -371,7 +371,7 @@ static int mspack_write(int fd, const void *buff, unsigned int count, struct cab
     if((ret = cli_writen(fd, buff, count)) > 0)
 	file->written_size += ret;
 
-    return (ret == -1) ? CL_EWRITE : CL_SUCCESS;
+    return (ret == -1) ? CL_EWRITE : CL_SUCCESS_T;
 }
 
 /* a clean implementation of RFC 1951 / inflate */
@@ -619,7 +619,7 @@ struct mszip_stream *mszip_init(int ofd,
   zip->ofd	       = ofd;
   zip->wflag	       = 1;
   zip->inbuf_size      = input_buffer_size;
-  zip->error           = CL_SUCCESS;
+  zip->error           = CL_SUCCESS_T;
   zip->repair_mode     = repair_mode;
   zip->flush_window    = &mszip_flush_window;
   zip->input_end       = 0;
@@ -650,13 +650,13 @@ int mszip_decompress(struct mszip_stream *zip, uint32_t out_bytes) {
   i = zip->o_end - zip->o_ptr;
   if (((off_t) i > out_bytes) && ((int) out_bytes >= 0)) i = (int) out_bytes;
   if (i) {
-    if (zip->wflag && (ret = mspack_write(zip->ofd, zip->o_ptr, i, zip->file)) != CL_SUCCESS) {
+    if (zip->wflag && (ret = mspack_write(zip->ofd, zip->o_ptr, i, zip->file)) != CL_SUCCESS_T) {
       return zip->error = ret;
     }
     zip->o_ptr  += i;
     out_bytes   -= i;
   }
-  if (out_bytes == 0) return CL_SUCCESS;
+  if (out_bytes == 0) return CL_SUCCESS_T;
 
   while (out_bytes > 0) {
     /* unpack another block */
@@ -696,7 +696,7 @@ int mszip_decompress(struct mszip_stream *zip, uint32_t out_bytes) {
     /* write a frame */
     i = (out_bytes < (off_t)zip->bytes_output) ?
       (int)out_bytes : zip->bytes_output;
-    if (zip->wflag && (ret = mspack_write(zip->ofd, zip->o_ptr, i, zip->file)) != CL_SUCCESS) {
+    if (zip->wflag && (ret = mspack_write(zip->ofd, zip->o_ptr, i, zip->file)) != CL_SUCCESS_T) {
       return zip->error = ret;
     }
 
@@ -710,7 +710,7 @@ int mszip_decompress(struct mszip_stream *zip, uint32_t out_bytes) {
   if (out_bytes)
     cli_dbgmsg("mszip_decompress: bytes left to output\n");
 
-  return CL_SUCCESS;
+  return CL_SUCCESS_T;
 }
 
 void mszip_free(struct mszip_stream *zip) {
@@ -804,7 +804,7 @@ static int lzx_read_input(struct lzx_stream *lzx) {
   lzx->i_ptr = &lzx->inbuf[0];
   lzx->i_end = &lzx->inbuf[bread];
 
-  return CL_SUCCESS;
+  return CL_SUCCESS_T;
 }
 
 /* Huffman decoding macros */
@@ -994,7 +994,7 @@ static int lzx_read_lens(struct lzx_stream *lzx, unsigned char *lens,
 
   LZX_STORE_BITS;
 
-  return CL_SUCCESS;
+  return CL_SUCCESS_T;
 }
 
 static void lzx_reset_state(struct lzx_stream *lzx) {
@@ -1087,7 +1087,7 @@ struct lzx_stream *lzx_init(int ofd,
   lzx->intel_started   = 0;
   lzx->input_end       = 0;
 
-  lzx->error = CL_SUCCESS;
+  lzx->error = CL_SUCCESS_T;
 
   lzx->i_ptr = lzx->i_end = &lzx->inbuf[0];
   lzx->o_ptr = lzx->o_end = &lzx->e8_buf[0];
@@ -1122,14 +1122,14 @@ int lzx_decompress(struct lzx_stream *lzx, uint32_t out_bytes) {
   i = lzx->o_end - lzx->o_ptr;
   if (((off_t) i > out_bytes) && ((int) out_bytes >= 0)) i = (int) out_bytes;
   if (i) {
-    if (lzx->wflag && (ret = mspack_write(lzx->ofd, lzx->o_ptr, i, lzx->file)) != CL_SUCCESS) {
+    if (lzx->wflag && (ret = mspack_write(lzx->ofd, lzx->o_ptr, i, lzx->file)) != CL_SUCCESS_T) {
       return lzx->error = ret;
     }
     lzx->o_ptr  += i;
     lzx->offset += i;
     out_bytes   -= i;
   }
-  if (out_bytes == 0) return CL_SUCCESS;
+  if (out_bytes == 0) return CL_SUCCESS_T;
 
   /* restore local state */
   LZX_RESTORE_BITS;
@@ -1508,7 +1508,7 @@ int lzx_decompress(struct lzx_stream *lzx, uint32_t out_bytes) {
 
     /* write a frame */
     i = (out_bytes < (off_t)frame_size) ? (unsigned int)out_bytes : frame_size;
-    if (lzx->wflag && (ret = mspack_write(lzx->ofd, lzx->o_ptr, i, lzx->file)) != CL_SUCCESS) {
+    if (lzx->wflag && (ret = mspack_write(lzx->ofd, lzx->o_ptr, i, lzx->file)) != CL_SUCCESS_T) {
       return lzx->error = ret;
     }
     lzx->o_ptr  += i;
@@ -1535,7 +1535,7 @@ int lzx_decompress(struct lzx_stream *lzx, uint32_t out_bytes) {
   lzx->R1 = R1;
   lzx->R2 = R2;
 
-  return CL_SUCCESS;
+  return CL_SUCCESS_T;
 }
 
 void lzx_free(struct lzx_stream *lzx) {
@@ -1642,7 +1642,7 @@ static int qtm_read_input(struct qtm_stream *qtm) {
 
   qtm->i_ptr = &qtm->inbuf[0];
   qtm->i_end = &qtm->inbuf[nread];
-  return CL_SUCCESS;
+  return CL_SUCCESS_T;
 }
 
 /* Arithmetic decoder:
@@ -1806,7 +1806,7 @@ struct qtm_stream *qtm_init(int ofd,
   qtm->window_posn = 0;
   qtm->frame_start = 0;
   qtm->header_read = 0;
-  qtm->error       = CL_SUCCESS;
+  qtm->error       = CL_SUCCESS_T;
 
   qtm->i_ptr = qtm->i_end = &qtm->inbuf[0];
   qtm->o_ptr = qtm->o_end = &qtm->window[0];
@@ -1854,13 +1854,13 @@ int qtm_decompress(struct qtm_stream *qtm, uint32_t out_bytes) {
   i = qtm->o_end - qtm->o_ptr;
   if (((off_t) i > out_bytes) && ((int) out_bytes >= 0)) i = (int) out_bytes;
   if (i) {
-    if (qtm->wflag && (ret = mspack_write(qtm->ofd, qtm->o_ptr, i, qtm->file)) != CL_SUCCESS) {
+    if (qtm->wflag && (ret = mspack_write(qtm->ofd, qtm->o_ptr, i, qtm->file)) != CL_SUCCESS_T) {
       return qtm->error = ret;
     }
     qtm->o_ptr  += i;
     out_bytes   -= i;
   }
-  if (out_bytes == 0) return CL_SUCCESS;
+  if (out_bytes == 0) return CL_SUCCESS_T;
 
   /* restore local state */
   QTM_RESTORE_BITS;
@@ -1984,7 +1984,7 @@ int qtm_decompress(struct qtm_stream *qtm, uint32_t out_bytes) {
 	i = (qtm->o_end - qtm->o_ptr);
 	if(i <= 0)
 	    break;
-	if (qtm->wflag && (ret = mspack_write(qtm->ofd, qtm->o_ptr, i, qtm->file)) != CL_SUCCESS) {
+	if (qtm->wflag && (ret = mspack_write(qtm->ofd, qtm->o_ptr, i, qtm->file)) != CL_SUCCESS_T) {
 	  return qtm->error = ret;
 	}
 	out_bytes -= i;
@@ -2000,7 +2000,7 @@ int qtm_decompress(struct qtm_stream *qtm, uint32_t out_bytes) {
 
   if (out_bytes > 0) {
     i = (int) out_bytes;
-    if (qtm->wflag && (ret = mspack_write(qtm->ofd, qtm->o_ptr, i, qtm->file)) != CL_SUCCESS) {
+    if (qtm->wflag && (ret = mspack_write(qtm->ofd, qtm->o_ptr, i, qtm->file)) != CL_SUCCESS_T) {
       return qtm->error = ret;
     }
     qtm->o_ptr += i;
@@ -2014,7 +2014,7 @@ int qtm_decompress(struct qtm_stream *qtm, uint32_t out_bytes) {
   qtm->L = L;
   qtm->C = C;
 
-  return CL_SUCCESS;
+  return CL_SUCCESS_T;
 }
 
 void qtm_free(struct qtm_stream *qtm) {

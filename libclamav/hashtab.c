@@ -374,7 +374,7 @@ static int cli_hashtab_grow(struct cli_hashtable *s)
 	s->maxfill = new_capacity*8/10;
 	cli_dbgmsg("Table %p size after grow:%ld\n",(void*)s,s->capacity);
 	PROFILE_GROW_DONE(s);
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 #ifndef USE_MPOOL
@@ -424,7 +424,7 @@ static int cli_htu32_grow(struct cli_htu32 *s, mpool_t *mempool)
 	s->maxfill = new_capacity*8/10;
 	cli_dbgmsg("Table %p size after grow:%ld\n",(void*)s,s->capacity);
 	PROFILE_GROW_DONE(s);
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 
@@ -616,7 +616,7 @@ int cli_hashtab_store(const struct cli_hashtable *s,FILE* out)
 			fprintf(out,"%ld %s\n",e->data,e->key);
 		}
 	}
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 int cli_hashtab_generate_c(const struct cli_hashtable *s,const char* name)
@@ -652,7 +652,7 @@ int cli_hashtab_load(FILE* in, struct cli_hashtable *s)
 		sscanf(line,"%d %1023s",&val,l);
 		cli_hashtab_insert(s,l,strlen(l),val);
 	}
-	return CL_SUCCESS;
+	return CL_SUCCESS_T;
 }
 
 /* Initialize hashset. @initial_capacity is rounded to nearest power of 2.

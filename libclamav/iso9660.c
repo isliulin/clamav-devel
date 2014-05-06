@@ -53,9 +53,9 @@ static const void *needblock(const iso9660_t *iso, unsigned int block, int temp)
 
 static int iso_scan_file(const iso9660_t *iso, unsigned int block, unsigned int len) {
     char *tmpf;
-    int fd, ret = CL_SUCCESS;
+    int fd, ret = CL_SUCCESS_T;
 
-    if(cli_gentempfd(iso->ctx->engine->tmpdir, &tmpf, &fd) != CL_SUCCESS)
+    if(cli_gentempfd(iso->ctx->engine->tmpdir, &tmpf, &fd) != CL_SUCCESS_T)
         return CL_ETMPFILE;
 
     cli_dbgmsg("iso_scan_file: dumping to %s\n", tmpf);
@@ -192,7 +192,7 @@ static int iso_parse_dir(iso9660_t *iso, unsigned int block, unsigned int len) {
 		if(dir[25] & 2) {
 		    ret = iso_parse_dir(iso, fileoff, filesz);
 		} else {
-		    if(cli_checklimits("ISO9660", ctx, filesz, 0, 0) != CL_SUCCESS)
+		    if(cli_checklimits("ISO9660", ctx, filesz, 0, 0) != CL_SUCCESS_T)
 			cli_dbgmsg("iso_parse_dir: Skipping overlimit file\n");
 		    else
 			ret = iso_scan_file(iso, fileoff, filesz);
@@ -312,7 +312,7 @@ int cli_scaniso(cli_ctx *ctx, size_t offset) {
 
     iso.ctx = ctx;
     i = cli_hashset_init(&iso.dir_blocks, 1024, 80);
-    if(i != CL_SUCCESS)
+    if(i != CL_SUCCESS_T)
 	return i;
     i = iso_parse_dir(&iso, cli_readint32(privol+156+2) + privol[156+1], cli_readint32(privol+156+10));
     cli_hashset_destroy(&iso.dir_blocks);

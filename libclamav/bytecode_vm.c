@@ -1238,7 +1238,7 @@ int cli_vm_execute(const struct cli_bc *bc, struct cli_bc_ctx *ctx, const struct
 	if (bb) {
 	    CHECK_GT(bb->numInsts, bb_inst);
 	}
-    } while (stop == CL_SUCCESS);
+    } while (stop == CL_SUCCESS_T);
     if (cli_debug_flag) {
 	gettimeofday(&tv1, NULL);
 	tv1.tv_sec -= tv0.tv_sec;
@@ -1254,5 +1254,5 @@ int cli_vm_execute(const struct cli_bc *bc, struct cli_bc_ctx *ctx, const struct
     cli_stack_destroy(&stack);
     free(ptrinfos.stack_infos);
     free(ptrinfos.glob_infos);
-    return stop == CL_BREAK ? CL_SUCCESS : stop;
+    return stop == CL_BREAK ? CL_SUCCESS_T : stop;
 }

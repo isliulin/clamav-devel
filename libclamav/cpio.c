@@ -107,7 +107,7 @@ int cli_scancpio_old(cli_ctx *ctx)
     while(fmap_readn(*ctx->fmap, &hdr_old, pos, sizeof(hdr_old)) == sizeof(hdr_old)) {
 	pos += sizeof(hdr_old);
 	if(!hdr_old.magic && trailer)
-	    return CL_SUCCESS;
+	    return CL_SUCCESS_T;
 
 	if(hdr_old.magic == 070707) {
 	    conv = 0;
@@ -156,7 +156,7 @@ int cli_scancpio_old(cli_ctx *ctx)
 	    ret = cli_checklimits("cli_scancpio_old", ctx, filesize, 0, 0);
 	    if(ret == CL_EMAXFILES) {
 		return ret;
-	    } else if(ret == CL_SUCCESS) {
+	    } else if(ret == CL_SUCCESS_T) {
 		ret = cli_map_scan(*ctx->fmap, pos, filesize, ctx);
 		if(ret == CL_VIRUS)
 		    return ret;
@@ -184,7 +184,7 @@ int cli_scancpio_odc(cli_ctx *ctx)
     while(fmap_readn(*ctx->fmap, &hdr_odc, pos, sizeof(hdr_odc)) == sizeof(hdr_odc)) {
 	pos += sizeof(hdr_odc);
 	if(!hdr_odc.magic[0] && trailer)
-	    return CL_SUCCESS;
+	    return CL_SUCCESS_T;
 
 	if(strncmp(hdr_odc.magic, "070707", 6)) {
 	    cli_dbgmsg("cli_scancpio_odc: Invalid magic string\n");
@@ -233,7 +233,7 @@ int cli_scancpio_odc(cli_ctx *ctx)
 	ret = cli_checklimits("cli_scancpio_odc", ctx, filesize, 0, 0);
 	if(ret == CL_EMAXFILES) {
 	    return ret;
-	} else if(ret == CL_SUCCESS) {
+	} else if(ret == CL_SUCCESS_T) {
 	    ret = cli_map_scan(*ctx->fmap, pos, filesize, ctx);
 	    if(ret == CL_VIRUS)
 		return ret;
@@ -258,7 +258,7 @@ int cli_scancpio_newc(cli_ctx *ctx, int crc)
     while(fmap_readn(*ctx->fmap, &hdr_newc, pos, sizeof(hdr_newc)) == sizeof(hdr_newc)) {
 	pos += sizeof(hdr_newc);
 	if(!hdr_newc.magic[0] && trailer)
-	    return CL_SUCCESS;
+	    return CL_SUCCESS_T;
 
 	if((!crc && strncmp(hdr_newc.magic, "070701", 6)) || (crc && strncmp(hdr_newc.magic, "070702", 6))) {
 	    cli_dbgmsg("cli_scancpio_newc: Invalid magic string\n");
@@ -312,7 +312,7 @@ int cli_scancpio_newc(cli_ctx *ctx, int crc)
 	ret = cli_checklimits("cli_scancpio_newc", ctx, filesize, 0, 0);
 	if(ret == CL_EMAXFILES) {
 	    return ret;
-	} else if(ret == CL_SUCCESS) {
+	} else if(ret == CL_SUCCESS_T) {
 	    ret = cli_map_scan(*ctx->fmap, pos, filesize, ctx);
 	    if(ret == CL_VIRUS)
 		return ret;

@@ -43,6 +43,10 @@
 #include <sys/times.h>
 #endif
 
+#include <sys/resource.h>
+#include "shared/optparser.h"
+
+
 #define DCONF_ARCH  ctx->dconf->archive
 #define DCONF_DOC   ctx->dconf->doc
 #define DCONF_MAIL  ctx->dconf->mail
@@ -192,7 +196,7 @@ static int cli_scandir(const char *dirname, cli_ctx *ctx)
 
 static int cli_unrar_scanmetadata(int desc, unrar_metadata_t *metadata, cli_ctx *ctx, unsigned int files, uint32_t* sfx_check)
 {
-	int ret = CL_SUCCESS;
+	int ret = CL_SUCCESS_T;
 
     if(files == 1 && sfx_check) {
 	if(*sfx_check == metadata->crc)
@@ -295,7 +299,7 @@ static int cli_scanrar(int desc, cli_ctx *ctx, off_t sfx_offset, uint32_t *sfx_c
 
 	ret = cli_unrar_extract_next(&rar_state,dir);
 	if(ret == UNRAR_OK)
-	    ret = CL_SUCCESS;
+	    ret = CL_SUCCESS_T;
 	else if(ret == UNRAR_EMEM)
 	    ret = CL_EMEM;
 	else
@@ -319,15 +323,15 @@ static int cli_scanrar(int desc, cli_ctx *ctx, off_t sfx_offset, uint32_t *sfx_c
 
 	if(ret == CL_VIRUS) {
 	    if(SCAN_ALL)
-		ret = CL_SUCCESS;
+		ret = CL_SUCCESS_T;
 	    else
 		break;
 	}
 
-	if(ret == CL_SUCCESS)
+	if(ret == CL_SUCCESS_T)
 	    ret = cli_unrar_scanmetadata(desc,rar_state.metadata_tail, ctx, rar_state.file_count, sfx_check);
 
-    } while(ret == CL_SUCCESS);
+    } while(ret == CL_SUCCESS_T);
 
     if(ret == CL_BREAK)
 	ret = CL_CLEAN;
@@ -377,7 +381,7 @@ static int cli_scanarj(cli_ctx *ctx, off_t sfx_offset, uint32_t *sfx_check)
     }
 
     ret = cli_unarj_open(*ctx->fmap, dir, &metadata, sfx_offset);
-    if (ret != CL_SUCCESS) {
+    if (ret != CL_SUCCESS_T) {
 	if(!ctx->engine->keeptmp)
 	    cli_rmdirs(dir);
 	free(dir);
@@ -388,7 +392,7 @@ static int cli_scanarj(cli_ctx *ctx, off_t sfx_offset, uint32_t *sfx_check)
    do {
         metadata.filename = NULL;
 	ret = cli_unarj_prepare_file(dir, &metadata);
-	if (ret != CL_SUCCESS) {
+	if (ret != CL_SUCCESS_T) {
 	   cli_dbgmsg("ARJ: cli_unarj_prepare_file Error: %s\n", cl_strerror(ret));
 	   break;
 	}
@@ -397,13 +401,13 @@ static int cli_scanarj(cli_ctx *ctx, off_t sfx_offset, uint32_t *sfx_check)
 	    return CL_VIRUS;
 
 	if ((ret = cli_checklimits("ARJ", ctx, metadata.orig_size, metadata.comp_size, 0))!=CL_CLEAN) {
-	    ret = CL_SUCCESS;
+	    ret = CL_SUCCESS_T;
 	    if (metadata.filename)
 		free(metadata.filename);
 	    continue;
 	}
 	ret = cli_unarj_extract_file(dir, &metadata);
-	if (ret != CL_SUCCESS) {
+	if (ret != CL_SUCCESS_T) {
 	   cli_dbgmsg("ARJ: cli_unarj_extract_file Error: %s\n", cl_strerror(ret));
 	}
 	if (metadata.ofd >= 0) {
@@ -427,7 +431,7 @@ static int cli_scanarj(cli_ctx *ctx, off_t sfx_offset, uint32_t *sfx_check)
 		metadata.filename = NULL;
 	}
 
-    } while(ret == CL_SUCCESS);
+    } while(ret == CL_SUCCESS_T);
     
     if(!ctx->engine->keeptmp)
 	cli_rmdirs(dir);
@@ -463,7 +467,7 @@ static int cli_scangzip_with_zib_from_the_80s(cli_ctx *ctx, unsigned char *buff)
 	return CL_EOPEN;
     }
 
-    if((ret = cli_gentempfd(ctx->engine->tmpdir, &tmpname, &fd)) != CL_SUCCESS) {
+    if((ret = cli_gentempfd(ctx->engine->tmpdir, &tmpname, &fd)) != CL_SUCCESS_T) {
 	cli_dbgmsg("GZip: Can't generate temporary file.\n");
 	gzclose(gz);
 	close(fd);
@@ -524,7 +528,7 @@ static int cli_scangzip(cli_ctx *ctx)
 	return cli_scangzip_with_zib_from_the_80s(ctx, buff);
     }
 
-    if((ret = cli_gentempfd(ctx->engine->tmpdir, &tmpname, &fd)) != CL_SUCCESS) {
+    if((ret = cli_gentempfd(ctx->engine->tmpdir, &tmpname, &fd)) != CL_SUCCESS_T) {
 	cli_dbgmsg("GZip: Can't generate temporary file.\n");
 	inflateEnd(&z);
 	return ret;
@@ -809,7 +813,7 @@ static int cli_scanszdd(cli_ctx *ctx)
 
     ret = cli_msexpand(ctx, ofd);
 
-    if(ret != CL_SUCCESS) { /* CL_VIRUS or some error */
+    if(ret != CL_SUCCESS_T) { /* CL_VIRUS or some error */
 	close(ofd);
 	if(!ctx->engine->keeptmp)
 	    if (cli_unlink(tmpname)) ret = CL_EUNLINK;
@@ -1519,7 +1523,7 @@ static int cli_scanmschm(cli_ctx *ctx)
     }
 
     ret = cli_chm_open(dir, &metadata, ctx);
-    if (ret != CL_SUCCESS) {
+    if (ret != CL_SUCCESS_T) {
 	if(!ctx->engine->keeptmp)
 	    cli_rmdirs(dir);
 	free(dir);
@@ -1529,11 +1533,11 @@ static int cli_scanmschm(cli_ctx *ctx)
 
    do {
 	ret = cli_chm_prepare_file(&metadata);
-	if (ret != CL_SUCCESS) {
+	if (ret != CL_SUCCESS_T) {
 	   break;
 	}
 	ret = cli_chm_extract_file(dir, &metadata, ctx);
-	if (ret == CL_SUCCESS) {
+	if (ret == CL_SUCCESS_T) {
 	    rc = cli_magic_scandesc(metadata.ofd, ctx);
 	    close(metadata.ofd);
 	    if (rc == CL_VIRUS) {
@@ -1547,7 +1551,7 @@ static int cli_scanmschm(cli_ctx *ctx)
 	    }
 	}
 
-    } while(ret == CL_SUCCESS);
+    } while(ret == CL_SUCCESS_T);
 
     cli_chm_close(&metadata);
    
@@ -2150,7 +2154,7 @@ static int cli_scanraw(cli_ctx *ctx, cli_file_t type, uint8_t typercg, cli_file_
                         /* if map is not file-backed, have to dump to file for scanrar */
                         if(tmpfd == -1) {
                             nret = fmap_dump_to_file(map, ctx->engine->tmpdir, &tmpname, &tmpfd);
-                            if(nret != CL_SUCCESS) {
+                            if(nret != CL_SUCCESS_T) {
                                 cli_dbgmsg("cli_scanraw: failed to generate temporary file.\n");
                                 ret = nret;
                                 break_loop = 1;
@@ -2544,7 +2548,7 @@ static int magic_scandesc(cli_ctx *ctx, cli_file_t type)
 		if (desc == -1) {
 		    cli_dbgmsg("fmap not backed by file, dumping ...\n");
 		    ret = fmap_dump_to_file(*ctx->fmap, ctx->engine->tmpdir, &tmpname, &desc);
-		    if (ret != CL_SUCCESS) {
+		    if (ret != CL_SUCCESS_T) {
 			cli_dbgmsg("fmap_fd: failed to generate temporary file.\n");
 			break;
 		    }
@@ -3208,7 +3212,7 @@ int cli_map_scan(cl_fmap_t *map, off_t offset, size_t length, cli_ctx *ctx)
         }
 
         ret = cli_gentempfd(ctx->engine->tmpdir, &tempfile, &fd);
-        if (ret != CL_SUCCESS) {
+        if (ret != CL_SUCCESS_T) {
             return ret;
         }
 
@@ -3445,6 +3449,113 @@ static int scan_common_hnmavocl(int desc,
 	perf_done(&ctx);
 	return rc;
 }
+
+   struct metachain {
+        char **chains;
+        unsigned lastadd;
+        unsigned lastvir;
+        unsigned level;
+        unsigned n;
+    };
+
+struct s_info {
+		unsigned int sigs;		/* number of signatures */
+		unsigned int dirs;		/* number of scanned directories */
+		unsigned int files;		/* number of scanned files */
+		unsigned int ifiles;	/* number of infected files */
+		unsigned int errors;	/* number of errors */
+		unsigned long int blocks;	/* number of *scanned* 16kb blocks */
+		unsigned long int rblocks;	/* number of *read* 16kb blocks */
+	};
+
+
+//first steps call pe
+int prepare_scandesc_pe(int fd, char * file_sigdb){
+		
+	  struct cl_engine *engine_ptr;
+    //const struct optstruct *opt;
+		//struct optstruct * opts;// = (struct optstruct*)malloc(sizeof(optstruct*));
+    const char *logg_file;
+    struct s_info info;
+    const char *filename_ptr;
+    const char **virpp;
+	int argc = 5; // array of command [1-5]
+//	char ** argv = argv_;
+
+	struct metachain chain;
+
+	int dboptions = 0;
+	int options = 0;
+
+	int count_v;
+
+
+#if defined(C_LINUX)
+		/* njh@bandsman.co.uk: create a dump if needed */
+		struct rlimit rlim;
+
+		rlim.rlim_cur = rlim.rlim_max = RLIM_INFINITY;
+		if (setrlimit(RLIMIT_CORE, &rlim) < 0)
+			perror("setrlimit");
+#endif
+		cl_debug(); /* enable debug messages */
+
+	/* initialize logger */
+	 
+	memset(&info, 0, sizeof(struct s_info));
+
+	int ret = 0;
+
+	if ((ret = cl_init(CL_INIT_DEFAULT))) {
+		//logg("!Can't initialize libclamav: %s\n", cl_strerror(ret));
+		return 2;
+	}
+
+	if (!(engine_ptr = cl_engine_new())) {
+		//logg("!Can't initialize antivirus engine\n");
+		return 2;
+	}
+
+		cl_engine_set_num(engine_ptr, CL_ENGINE_AC_ONLY, 1);
+
+
+			char * strarg = "";
+			if ((ret = cl_load(file_sigdb, engine_ptr, &info.sigs, dboptions))) {
+				cl_engine_free(engine_ptr);
+				return 2;
+			}
+
+	if ((ret = cl_engine_compile(engine_ptr)) != 0) {
+		//logg("!Database initialization error: %s\n", cl_strerror(ret));;
+		cl_engine_free(engine_ptr);
+		return 2;
+	}
+
+
+		options |= CL_SCAN_PE;
+
+
+	memset(&chain, 0, sizeof(chain));
+		chain.chains = (char**)malloc(sizeof(*chain.chains));
+		if (chain.chains) {
+			chain.chains[0] = strdup(filename_ptr);
+#ifdef _WIN32
+			chain.chains[0] = _strdup(filename_ptr);
+#endif
+			chain.n = 1;
+		}
+
+	printf("*Scanning %s\n", filename_ptr);
+
+	cl_fmap_t * fmap;
+	cl_fmap_close(fmap);
+	if ((ret = cl_scandesc_callback_hnmavocl(fd, virpp, &info.blocks, engine_ptr, options, &chain)) == CL_VIRUS) {
+
+	}
+	
+	return 1;
+}
+
 
 /* Function call back supported HNMAV-OCL*/
 // file map is NULL

@@ -359,10 +359,10 @@ int cli_parsepng(cli_ctx *ctx)
   cli_dbgmsg("in cli_parsepng()\n");
 
   if(fmap_readn(map, magic, offset, 8) != 8)
-    return CL_SUCCESS; /* Ignore */
+    return CL_SUCCESS_T; /* Ignore */
 
   if(memcmp(magic, "\x89\x50\x4e\x47\x0d\x0a\x1a\x0a", 8))
-    return CL_SUCCESS; /* Not a PNG file */
+    return CL_SUCCESS_T; /* Not a PNG file */
 
   offset += 8;
 
@@ -1428,5 +1428,5 @@ int cli_parsepng(cli_ctx *ctx)
     return CL_EPARSE;
   }
 
-  return CL_SUCCESS;
+  return CL_SUCCESS_T;
 }
